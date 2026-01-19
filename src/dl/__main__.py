@@ -1,4 +1,5 @@
 import sys
+from dl.lex.lexer import Lexer, Tag
 
 if __name__ == '__main__':
     #Entrada
@@ -7,4 +8,10 @@ if __name__ == '__main__':
               'de arquivo para um programa na linguagem DL.')
         exit()
     file_input = sys.argv[1]
-    print(file_input)
+
+    #Análise Léxica
+    lexer = Lexer(file_input)
+    token = lexer.next_token()
+    while token.tag != Tag.EOF:
+        print(token)
+        token = lexer.next_token()
