@@ -71,8 +71,7 @@ class Lexer:
                 next_char()
                 return Token(Tag.RPAREN, ')', self.line)
             case Lexer.EOF_CHAR:
-                return Token(Tag.EOF, Lexer.EOF_CHAR, self.line)
-            
+                return Token(Tag.EOF, Lexer.EOF_CHAR, self.line)    
             case _:
                 lex = ''
                 if self.peek.isdigit():

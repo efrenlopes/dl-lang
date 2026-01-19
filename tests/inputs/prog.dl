@@ -1,5 +1,6 @@
-programa maior inicio
-  inteiro raio; booleano positivo;
+programa area_circulo inicio
+  inteiro raio;
+  booleano positivo;
   area = 5;
   positivo = (raio > 1 | raio == 1);
   se (positivo == verdade) inicio
