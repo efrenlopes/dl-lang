@@ -19,6 +19,12 @@ class Tag(Enum):
     #Outros
     EOF = auto()
     UNK = auto()
+
+    #Literais numéricos
+    LIT_INT = auto()
+    LIT_REAL = auto()
+
+    ID = auto()
         
     def __str__(self):
         return self.name

@@ -60,6 +60,27 @@ class Lexer:
                 return Token(Tag.RPAREN, ')', self.line)
             case Lexer.EOF_CHAR:
                 return Token(Tag.EOF, Lexer.EOF_CHAR, self.line)
+            
+            case _:
+                lex = ''
+                if self.peek.isdigit():
+                    while self.peek.isdigit():
+                        lex += self.peek
+                        next_char()
+                    if self.peek != '.':
+                        return Token(Tag.LIT_INT, lex, self.line)
+                    
+                    while True:
+                        lex += self.peek
+                        next_char()
+                        if not self.peek.isdigit():
+                            break
+                    return Token(Tag.LIT_REAL, lex, self.line)
+                elif ( self.peek.isalpha() or self.peek == '_' ):
+                    while( self.peek.isalnum() or self.peek == '_' ):
+                        lex += self.peek
+                        next_char()
+                    return Token(Tag.ID, lex, self.line)
 
         unk = self.peek
         next_char()
