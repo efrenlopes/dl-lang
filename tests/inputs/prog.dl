@@ -2,4 +2,7 @@ programa area_circulo inicio
   inteiro raio;
   booleano positivo;
   real area;
+  raio = (4 + 3) * 2;
+  positivo = (raio > 1 | raio == 1);
+  area = 3.1415 * raio * raio;
 fim.

@@ -12,8 +12,8 @@ PYTHONPATH=src python -m dl ./test/prog.dl
 <BLOCK>     ::= "inicio" <STMTS> "fim"
 <STMTS>     ::= <STMT> ";" <STMTS> | ε
 <ASSIGN>    ::= ID "=" <EXPR>
-<WRITE>     ::= "escreva" "(" <EXPR> ")"
 <IF>        ::= "se" "(" <EXPR> ")" <STMT>
+<WRITE>     ::= "escreva" "(" <EXPR> ")"
 <EXPR>      ::= <EXPR> "|" <EQUAL> | <EQUAL>
 <EQUAL>     ::= <EQUAL> "==" <REL> | <REL>
 <REL>       ::= <REL> "<" <ARITH> | <REL> ">" <ARITH> | <ARITH>
