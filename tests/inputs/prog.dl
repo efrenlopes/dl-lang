@@ -1,3 +1,5 @@
-programa area_circulo 
-  inteiro raio
-.
+programa area_circulo inicio
+  inteiro raio;
+  booleano positivo;
+  real area;
+fim.

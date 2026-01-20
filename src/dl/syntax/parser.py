@@ -35,6 +35,8 @@ class Parser:
 
     def __stmt(self):
         match self.lookahead.tag:
+            case Tag.BEGIN: 
+                return self.__block()
             case Tag.INT | Tag.REAL | Tag.BOOL: 
                 return self.__decl()
             case _: 
@@ -44,13 +46,13 @@ class Parser:
         self.__move()
         self.__match(Tag.ID)
 
-    # def __block(self):
-    #     match = self.__match
-    #     match(Tag.BEGIN)
-    #     while self.lookahead.tag != Tag.END:
-    #         self.__stmt()
-    #         match(Tag.SEMI)
-    #     match(Tag.END)
+    def __block(self):
+        match = self.__match
+        match(Tag.BEGIN)
+        while self.lookahead.tag != Tag.END:
+            self.__stmt()
+            match(Tag.SEMI)
+        match(Tag.END)
 
 
 
