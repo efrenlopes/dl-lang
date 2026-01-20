@@ -41,6 +41,8 @@ class Parser:
                 return self.__decl()
             case Tag.ID: 
                 return self.__assign()
+            case Tag.IF: 
+                return self.__if()            
             case _: 
                 self.__error(self.lookahead.line, 'comando inválido!')        
 
@@ -61,6 +63,14 @@ class Parser:
         match(Tag.ID)
         match(Tag.ASSIGN)
         self.__expr()
+
+    def __if(self):
+        match = self.__match
+        match(Tag.IF)
+        match(Tag.LPAREN)
+        self.__expr()
+        match(Tag.RPAREN)
+        self.__stmt()
 
     def __expr(self):
         self.__equal()
