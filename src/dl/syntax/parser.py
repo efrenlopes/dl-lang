@@ -107,34 +107,39 @@ class Parser:
         return WriteNode(write_tok, expr)
 
     def __expr(self):
-        self.__equal()
+        expr = self.__equal()
         while self.lookahead.tag == Tag.OR:
-            self.__move()
-            self.__equal()
+            op_tok = self.__move()
+            expr = BinaryNode(op_tok, expr, self.__equal())
+        return expr
 
     def __equal(self):
-        self.__rel()
+        expr = self.__rel()
         while self.lookahead.tag == Tag.EQ:
-            self.__move()
-            self.__rel()
+            op_tok = self.__move()
+            expr = BinaryNode(op_tok, expr, self.__rel())
+        return expr
 
     def __rel(self):
-        self.__arith()
+        expr = self.__arith()
         while self.lookahead.tag in (Tag.LT, Tag.GT):
-            self.__move()
-            self.__arith()
+            op_tok = self.__move()
+            expr = BinaryNode(op_tok, expr, self.__arith())
+        return expr
 
     def __arith(self):
-        self.__term()
+        expr = self.__term()
         while self.lookahead.tag in (Tag.SUM, Tag.SUB):
-            self.__move()
-            self.__term()
+            op_tok = self.__move()
+            expr = BinaryNode(op_tok, expr, self.__term())
+        return expr
 
     def __term(self):
-        self.__factor()
+        expr = self.__factor()
         while self.lookahead.tag == Tag.MUL:
-            self.__move()
-            self.__factor()
+            op_tok = self.__move()
+            expr = BinaryNode(op_tok, expr, self.__factor())
+        return expr
 
     def __factor(self):
         match = self.__match
