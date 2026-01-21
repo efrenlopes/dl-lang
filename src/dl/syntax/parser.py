@@ -91,11 +91,12 @@ class Parser:
 
     def __if(self):
         match = self.__match
-        match(Tag.IF)
+        if_tok = match(Tag.IF)
         match(Tag.LPAREN)
-        self.__expr()
+        expr = self.__expr()
         match(Tag.RPAREN)
-        self.__stmt()
+        stmt = self.__stmt()
+        return IfNode(if_tok, expr, stmt)
 
     def __write(self):
         match = self.__match
