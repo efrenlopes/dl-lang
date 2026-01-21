@@ -65,8 +65,10 @@ class Parser:
                 self.__error(self.lookahead.line, 'comando inválido!')        
 
     def __decl(self):
-        self.__move()
-        self.__match(Tag.ID)
+        type_tok = self.__move()
+        var_tok = self.__match(Tag.ID)
+        var = VarNode(var_tok)
+        return DeclNode(type_tok, var)
 
     def __block(self):
         match = self.__match
