@@ -100,10 +100,11 @@ class Parser:
 
     def __write(self):
         match = self.__match
-        match(Tag.WRITE)
+        write_tok = match(Tag.WRITE)
         match(Tag.LPAREN)
-        self.__expr()
+        expr = self.__expr()
         match(Tag.RPAREN)
+        return WriteNode(write_tok, expr)
 
     def __expr(self):
         self.__equal()
