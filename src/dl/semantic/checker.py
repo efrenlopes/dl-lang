@@ -131,8 +131,37 @@ class Checker(Visitor):
                     self.__error(node.line, f'O valor {value} está fora da faixa de valores dos reais')            
 
 
+
     def visit_binary_node(self, node: BinaryNode):
-        pass        
+        node.expr1.accept(self)
+        node.expr2.accept(self)
+        
+        t1 = node.expr1.type
+        t2 = node.expr2.type
+        common_type = Type.common_type(t1, t2)
+        
+        match node.operator:
+            case '|':
+                if t1.is_boolean and t2.is_boolean:
+                    node.type = Type.BOOL
+            case '==':
+                if common_type:
+                    node.type = Type.BOOL
+            case '+' | '-' | '*':
+                if t1.is_numeric and t2.is_numeric:
+                    node.type = common_type
+            case '>' | '<':
+                if t1.is_numeric and t2.is_numeric:
+                    node.type = Type.BOOL
+        
+        if not node.type:
+            self.__error(node.line, f'Operação {node.operator} com operandos inválidos')
+        else:
+            node.expr1 = Checker.widening(node.expr1, common_type)
+            node.expr2 = Checker.widening(node.expr2, common_type)
     
+
+
+
     def visit_convert_node(self, node: ConvertNode):
         pass
