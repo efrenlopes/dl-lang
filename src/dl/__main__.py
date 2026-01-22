@@ -1,6 +1,7 @@
 import sys
 from dl.lex.lexer import Lexer
 from dl.syntax.parser import Parser
+from dl.semantic.checker import Checker
 
 if __name__ == '__main__':
     #Entrada
@@ -16,7 +17,12 @@ if __name__ == '__main__':
     #Análise Sintática
     parser = Parser(lexer)
     ast = parser.ast
-    print("\n\nAST")
+    print('\n\nAST')
+    print(ast)
+
+    #Análise Semântica
+    checker = Checker(ast)
+    print('\n\nAST com anotações semânticas')
     print(ast)
 
     #Fim

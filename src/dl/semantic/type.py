@@ -58,7 +58,8 @@ class Type:
         if t1 == t2:
             return t1
         elif t1.is_numeric and t2.is_numeric:
-            return t1 if t1.rank > t2.rank else t2            
+            return t1 if t1.rank > t2.rank else t2
+        return None          
 
 
 Type.BOOL   = Type('bool', TypeCategory.BOOLEAN,  4, False, 0)
