@@ -17,13 +17,13 @@ if __name__ == '__main__':
     #Análise Sintática
     parser = Parser(lexer)
     ast = parser.ast
-    print('\n\nAST')
-    print(ast)
+    print('\nAST')
+    print(ast, '\n')
 
     #Análise Semântica
     checker = Checker(ast)
-    print('\n\nAST com anotações semânticas')
-    print(ast)
+    print('\nAST com anotações semânticas')
+    print(ast, '\n')
 
     #Fim
-    print('\n\nCompilação concluída com sucesso!')
+    print('\nCompilação concluída com sucesso!')

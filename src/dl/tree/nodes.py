@@ -23,6 +23,9 @@ class Node(ABC):
                 children.append(var)
         return iter(children)
 
+    def __repr__(self):
+        return f'<{self.__class__.__name__}:{str(self)}>'
+
 
 
 class ExprNode(Node):
@@ -118,6 +121,8 @@ class StmtNode(Node):
     def __str__(self):
         return self.__class__.__name__
 
+    def __repr__(self):
+        return f'<{str(self)}>'
 
 
 
