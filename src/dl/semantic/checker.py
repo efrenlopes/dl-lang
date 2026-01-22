@@ -12,16 +12,28 @@ class Checker(Visitor):
         self.has_semantic_error = False
         ast.root.accept(self)
 
+
     def __error(self, line: int, msg: str):
         self.has_semantic_error = True
         print(f'Erro semântico na linha {line}: {msg}')  
         
+
     def visit_program_node(self, node: ProgramNode):
         node.stmt.accept(self)
         
+
     def visit_block_node(self, node: BlockNode):
-        pass
-    
+        saved_env = self.__env_top
+        self.__env_top = Env(self.__env_top)
+        for stmt in node.stmts:
+            stmt.accept(self)        
+        for var in self.__env_top.var_list():
+            info = self.__env_top.get_local(var)
+            if not info.used:
+                print(f"Aviso: variável {var} declarada na linha {info.declaration_line} mas não usada")
+        self.__env_top = saved_env
+
+
     def visit_decl_node(self, node: DeclNode):
         pass
 
