@@ -135,76 +135,78 @@ class IC(Visitor):
     
         
 
-    # def update_label_index(self):
-    #     for i, instr in enumerate(self.__instr):
-    #         if instr.op == 'label':
-    #             self.__label_map[instr.result] = i
+    def update_label_index(self):
+        for i, instr in enumerate(self.__instr):
+            if instr.op == 'label':
+                self.__label_map[instr.result] = i
     
-    # def label_index(self, label: str):
-    #     return self.__label_map[label]
+    def label_index(self, label: str):
+        return self.__label_map[label]
 
 
-    # OPS = {
-    #     '+': lambda a, b: a + b,
-    #     '-': lambda a, b: a - b,
-    #     '*': lambda a, b: a * b,
-    #     '==': lambda a, b: a == b,
-    #     '<': lambda a, b: a < b,
-    #     '>': lambda a, b: a > b,
-    #     '|': lambda a, b: a or b
-    # }
 
-    # @staticmethod
-    # def operate(op: str, value1, value2):
-    #     value = IC.OPS[op](value1, value2)
-    #     if isinstance(value, int):
-    #         return c_int32(value).value
-    #     elif isinstance(value, float):
-    #         return c_double(value).value
-    #     elif isinstance(value, bool):
-    #         return value
+
+    OPS = {
+        '+': lambda a, b: a + b,
+        '-': lambda a, b: a - b,
+        '*': lambda a, b: a * b,
+        '==': lambda a, b: a == b,
+        '<': lambda a, b: a < b,
+        '>': lambda a, b: a > b,
+        '|': lambda a, b: a or b
+    }
+
+    @staticmethod
+    def operate(op: str, value1, value2):
+        value = IC.OPS[op](value1, value2)
+        if isinstance(value, int):
+            return c_int32(value).value
+        elif isinstance(value, float):
+            return c_double(value).value
+        elif isinstance(value, bool):
+            return value
         
 
-    # def interpret(self):
-    #     self.update_label_index()
-    #     vars = {}
+    def interpret(self):
+        self.update_label_index()
+        vars = {}
                 
-    #     def get_value(arg):
-    #         if arg.is_temp:
-    #             return vars[arg]
-    #         if arg.is_const:
-    #             return arg.value
+        def get_value(arg):
+            if arg.is_temp:
+                return vars[arg]
+            if arg.is_const:
+                return arg.value
 
-    #     index = 0
-    #     while True:
-    #         if index >= len(self.__instr):
-    #             break  
+        index = 0
+        while True:
+            if index >= len(self.__instr):
+                break  
 
-    #         op = self.__instr[index].op
-    #         result = self.__instr[index].result
-    #         value1 = get_value(self.__instr[index].arg1)
-    #         value2 = get_value(self.__instr[index].arg2)
+            op = self.__instr[index].op
+            result = self.__instr[index].result
+            value1 = get_value(self.__instr[index].arg1)
+            value2 = get_value(self.__instr[index].arg2)
             
-    #         if op == 'label':
-    #             pass
-    #         elif op == 'if':
-    #             if value1:                    
-    #                 index = self.__label_map[result]                    
-    #                 continue
-    #         elif op == 'iffalse':
-    #             if not value1:
-    #                 index = self.__label_map[result]
-    #                 continue
-    #         elif op == 'goto':
-    #             index = self.__label_map[result]
-    #             continue
-    #         elif op == 'print':
-    #             print('output:', value1)
-    #         elif op == 'convert':
-    #             vars[result] = float(value1)
-    #         elif op == '=':
-    #             vars[result] = value1
-    #         else:
-    #             vars[result] = IC.operate(op, value1, value2)
+            if op == 'label':
+                pass
+            elif op == 'if':
+                if value1:                    
+                    index = self.__label_map[result]                    
+                    continue
+            elif op == 'iffalse':
+                if not value1:
+                    index = self.__label_map[result]
+                    continue
+            elif op == 'goto':
+                index = self.__label_map[result]
+                continue
+            elif op == 'print':
+                print('output:', value1)
+            elif op == 'convert':
+                vars[result] = float(value1)
+            elif op == '=':
+                vars[result] = value1
+            else:
+                vars[result] = IC.operate(op, value1, value2)
                 
-    #         index += 1        
+            index += 1        
