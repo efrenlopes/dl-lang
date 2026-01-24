@@ -32,8 +32,8 @@ if __name__ == '__main__':
     ic = IC(ast)
     print("\nTAC")
     print(ic, '\n')
-    #print('\nTAC Interpretation Output')
-    #ic.interpret()
+    print('\nInterpretação do Código Intermediário')
+    ic.interpret()
 
     #Fim
     print('\nCompilação concluída com sucesso!')
