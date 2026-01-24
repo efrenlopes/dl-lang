@@ -3,7 +3,7 @@ from dl.tree.ast import AST
 from dl.semantic.type import Type
 from dl.inter.operand import Op, Temp, Const, Label
 from dl.inter.instr import Instr
-from dl.tree.nodes import Visitor, ProgramNode, BlockNode, DeclNode, AssignNode, IfNode, ConvertNode, VarNode, BinaryNode
+from dl.tree.nodes import Visitor, ProgramNode, BlockNode, DeclNode, AssignNode, IfNode, ConvertNode, VarNode, BinaryNode, LiteralNode
 from ctypes import c_int32, c_double
 
 
@@ -66,78 +66,73 @@ class IC(Visitor):
 
 
 
-    def visit_if_node(self, node): pass
-    
-    def visit_write_node(self, node): pass
-    
-    def visit_literal_node(self, node): pass
-    
-    def visit_binary_node(self, node): pass
-    
-    def visit_convert_node(self, node): pass
+
+    def visit_literal_node(self, node: LiteralNode):
+        return Const(node.type, node.value)
+
+    def visit_convert_node(self, node: ConvertNode):
+        arg = node.expr.accept(self)
+        temp = Temp(node.type)
+        self.add_instr(Instr('convert', arg, Op.EMPTY, temp))        
+        return temp
 
 
+
+
+    def visit_binary_node(self, node: BinaryNode):
+        arg1 = node.expr1.accept(self)
+        arg2 = node.expr2.accept(self)
+        temp = Temp(node.type)
+        EMPTY = Op.EMPTY
+        
+        if node.token.tag == Tag.OR:
+            #labels
+            lbl_true = Label()
+            lbl_false = Label()
+            lbl_end = Label()
+            #tests
+            self.add_instr(Instr('if', arg1, EMPTY, lbl_true))
+            self.add_instr(Instr('if', arg2, EMPTY, lbl_true))
+            self.add_instr(Instr('goto', EMPTY, EMPTY, lbl_false))
+            #true
+            self.add_instr(Instr('label', EMPTY, EMPTY, lbl_true))
+            self.add_instr(Instr('=', Const(Type.BOOL, True), EMPTY, temp))
+            self.add_instr(Instr('goto', EMPTY, EMPTY, lbl_end))
+            #false
+            self.add_instr(Instr('label', EMPTY, EMPTY, lbl_false))
+            self.add_instr(Instr('=', Const(Type.BOOL, False), EMPTY, temp))
+            self.add_instr(Instr('goto', EMPTY, EMPTY, lbl_end))
+            #end
+            self.add_instr(Instr('label', EMPTY, EMPTY, lbl_end))
+        else:   
+            self.add_instr(Instr(node.operator, arg1, arg2, temp))
+        
+        return temp
+
+
+
+
+    def visit_if_node(self, node: IfNode):
+        arg = node.expr.accept(self)
+        lbl_end = Label()
+        #test
+        self.add_instr(Instr('iffalse', arg, Op.EMPTY, lbl_end))
+        #true
+        node.stmt.accept(self)
+        self.add_instr(Instr('goto', Op.EMPTY, Op.EMPTY, lbl_end))
+        #end
+        self.add_instr(Instr('label', Op.EMPTY, Op.EMPTY, lbl_end))
         
     
-    # def visit_if_node(self, node: IfNode):
-    #     arg = node.expr.accept(self)
-    #     lbl_end = Label()
-    #     #test
-    #     self.add_instr(Instr('iffalse', arg, Op.EMPTY, lbl_end))
-    #     #true
-    #     node.stmt.accept(self)
-    #     self.add_instr(Instr('goto', Op.EMPTY, Op.EMPTY, lbl_end))
-    #     #end
-    #     self.add_instr(Instr('label', Op.EMPTY, Op.EMPTY, lbl_end))
-        
-    
-    # def visit_write_node(self, node: ConvertNode):
-    #     arg = node.expr.accept(self)
-    #     self.add_instr(Instr('print', arg, Op.EMPTY, Op.EMPTY))
+    def visit_write_node(self, node: ConvertNode):
+        arg = node.expr.accept(self)
+        self.add_instr(Instr('print', arg, Op.EMPTY, Op.EMPTY))
 
     
-    # def visit_literal_node(self, node):
-    #     type = Type.tag_to_type(node.token.tag)
-    #     const = Const(type, node.value)
-    #     return const
 
     
-    # def visit_binary_node(self, node: BinaryNode):
-    #     arg1 = node.expr1.accept(self)
-    #     arg2 = node.expr2.accept(self)
-    #     temp = Temp(node.type)
-    #     EMPTY = Op.EMPTY
-        
-    #     if node.token.tag == Tag.OR:
-    #         #labels
-    #         lbl_true = Label()
-    #         lbl_false = Label()
-    #         lbl_end = Label()
-    #         #tests
-    #         self.add_instr(Instr('if', arg1, EMPTY, lbl_true))
-    #         self.add_instr(Instr('if', arg2, EMPTY, lbl_true))
-    #         self.add_instr(Instr('goto', EMPTY, EMPTY, lbl_false))
-    #         #true
-    #         self.add_instr(Instr('label', EMPTY, EMPTY, lbl_true))
-    #         self.add_instr(Instr('=', Const(Type.BOOL, True), EMPTY, temp))
-    #         self.add_instr(Instr('goto', EMPTY, EMPTY, lbl_end))
-    #         #false
-    #         self.add_instr(Instr('label', EMPTY, EMPTY, lbl_false))
-    #         self.add_instr(Instr('=', Const(Type.BOOL, False), EMPTY, temp))
-    #         self.add_instr(Instr('goto', EMPTY, EMPTY, lbl_end))
-    #         #end
-    #         self.add_instr(Instr('label', EMPTY, EMPTY, lbl_end))
-    #     else:   
-    #         self.add_instr(Instr(node.operator, arg1, arg2, temp))
-        
-    #     return temp
         
     
-    # def visit_convert_node(self, node: ConvertNode):
-    #     arg = node.expr.accept(self)
-    #     temp = Temp(node.type)
-    #     self.add_instr(Instr('convert', arg, Op.EMPTY, temp))        
-    #     return temp
         
 
     # def update_label_index(self):
