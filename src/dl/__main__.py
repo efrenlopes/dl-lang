@@ -3,6 +3,7 @@ from dl.syntax.parser import Parser
 from dl.semantic.checker import Checker
 from dl.inter.ic import IC
 from dl.codegen.x64_codegen import X64CodeGenerator
+from pathlib import Path
 import sys
 import subprocess
 
@@ -39,11 +40,14 @@ if __name__ == '__main__':
 
     #Geração de código x64
     code = X64CodeGenerator(ic).code
-    file = open('out/prog.s', 'w')
+
+    file_name = 'out/prog.s'
+    Path(file_name).parent.mkdir(parents=True, exist_ok=True)
+    file = open(file_name, 'w')
     file.write('\n'.join(code))
     file.close()
     print('\n\nSaída do programa alvo gerado')
-    subprocess.run(['gcc', 'out/prog.s', '-o', 'out/prog'], check=True)
+    subprocess.run(['gcc', file_name, '-o', 'out/prog'], check=True)
     subprocess.run(['./out/prog'], check=True)
 
     #Fim
