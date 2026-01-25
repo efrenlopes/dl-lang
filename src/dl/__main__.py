@@ -40,7 +40,6 @@ if __name__ == '__main__':
 
     #Geração de código x64
     code = X64CodeGenerator(ic).code
-
     file_name = 'out/prog.s'
     Path(file_name).parent.mkdir(parents=True, exist_ok=True)
     file = open(file_name, 'w')
