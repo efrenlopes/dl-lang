@@ -37,4 +37,3 @@ def test_lexer():
         token = lexer.next_token()
         i += 1
     assert token.tag == Tag.EOF
-    return
