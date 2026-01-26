@@ -9,12 +9,12 @@ class Checker(Visitor):
     
     def __init__(self, ast: AST):
         self.__env_top = Env()
-        self.has_semantic_error = False
+        self.had_errors = False
         ast.root.accept(self)
 
 
     def __error(self, line: int, msg: str):
-        self.has_semantic_error = True
+        self.had_errors = True
         print(f'Erro semântico na linha {line}: {msg}')  
         
 

@@ -18,12 +18,14 @@ class Parser:
         self.lexer = lex
         self.lookahead = None
         self.ast = None
+        self.had_errors = False
         self.__move()
         self.__parse()
 
     def __error(self, line: int, msg: str):
         print(f'Erro sintático na linha {line}: {msg}')
-        exit()
+        self.had_errors = True
+        raise SyntaxError()
 
     def __move(self):
         save = self.lookahead
@@ -33,20 +35,43 @@ class Parser:
     def __match(self, tag: Tag):
         if self.lookahead.tag == tag:
             return self.__move()
-        self.__error(self.lookahead.line, f'Esperado "{tag.value}", mas encontrado "{self.lookahead.tag.value}"')
+        self.__error(self.lookahead.line, f'Esperado "{tag.value}", mas encontrado "{self.lookahead.tag.name}"')
+
+    def __synchronize(self):
+        while self.lookahead.tag not in (Tag.EOF, Tag.BEGIN, Tag.IF, Tag.WRITE, Tag.INT, Tag.REAL, Tag.BOOL, Tag.END):
+            self.__move()
 
     def __parse(self):
         root = self.__program()
         self.ast = AST(root)
 
     def __program(self):
+        try:
+            match = self.__match
+            prog_tok = match(Tag.PROGRAM)
+            prog_name_tok = match(Tag.ID)
+            stmt = self.__stmt()
+            match(Tag.DOT)
+            match(Tag.EOF)
+            return ProgramNode(prog_tok, prog_name_tok.lexeme, stmt)
+        except SyntaxError:
+            pass
+
+
+    def __block(self):
         match = self.__match
-        prog_tok = match(Tag.PROGRAM)
-        prog_name_tok = match(Tag.ID)
-        stmt = self.__stmt()
-        match(Tag.DOT)
-        match(Tag.EOF)
-        return ProgramNode(prog_tok, prog_name_tok.lexeme, stmt)
+        begin_tok = match(Tag.BEGIN)
+        block = BlockNode(begin_tok)
+        while self.lookahead.tag not in (Tag.END, Tag.EOF):
+            try:
+                stmt = self.__stmt()
+                block.add_stmt(stmt)
+                match(Tag.SEMI)
+            except SyntaxError:
+                self.__synchronize()
+        match(Tag.END)
+        return block
+
 
     def __stmt(self):
         match self.lookahead.tag:
@@ -63,22 +88,12 @@ class Parser:
             case _: 
                 self.__error(self.lookahead.line, 'comando inválido!')        
 
+
     def __decl(self):
         type_tok = self.__move()
         var_tok = self.__match(Tag.ID)
         var = VarNode(var_tok)
         return DeclNode(type_tok, var)
-
-    def __block(self):
-        match = self.__match
-        begin_tok = match(Tag.BEGIN)
-        block = BlockNode(begin_tok)
-        while self.lookahead.tag != Tag.END:
-            stmt = self.__stmt()
-            block.add_stmt(stmt)
-            match(Tag.SEMI)
-        match(Tag.END)
-        return block
 
     def __assign(self):
         match = self.__match

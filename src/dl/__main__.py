@@ -20,16 +20,18 @@ if __name__ == '__main__':
 
     #Análise Sintática
     parser = Parser(lexer)
+    if parser.had_errors:
+        exit()
     ast = parser.ast
     print('\nAST')
     print(ast, '\n')
 
     #Análise Semântica
     checker = Checker(ast)
+    if checker.had_errors:
+        exit()
     print('\nAST com anotações semânticas')
     print(ast, '\n')
-    if checker.has_semantic_error:
-        exit()
 
     #Geração de Código Intermediário
     ic = IC(ast)
