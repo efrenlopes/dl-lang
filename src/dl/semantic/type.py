@@ -57,7 +57,7 @@ class Type:
     def common_type(t1: 'Type', t2: 'Type'):
         if t1 == t2:
             return t1
-        elif t1.is_numeric and t2.is_numeric:
+        elif t1 and t2 and t1.is_numeric and t2.is_numeric:
             return t1 if t1.rank > t2.rank else t2
         return None          
 

@@ -33,7 +33,7 @@ def test_lexer():
     token = lexer.next_token()
     i = 0
     while i < len(tags_seq) and token.tag != Tag.EOF:
-        assert token.tag == tags_seq[i], f"Erro no token {i}: esperado {tags_seq[i]}, recebido {token.tag} (Lexema: '{token.lexeme}')"
+        assert token.tag == tags_seq[i], f'Erro no token {i}: esperado "{tags_seq[i].name}", recebido "{token.tag.name}"'
         token = lexer.next_token()
         i += 1
     assert token.tag == Tag.EOF

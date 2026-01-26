@@ -10,16 +10,16 @@ class Lexer:
         self.peek = ' '
         #Keywords
         self.__words = {}
-        self.__words['programa'] = Tag.PROGRAM
-        self.__words['inicio'] = Tag.BEGIN
-        self.__words['fim'] = Tag.END
-        self.__words['escreva'] = Tag.WRITE
-        self.__words['se'] = Tag.IF
-        self.__words['inteiro'] = Tag.INT
-        self.__words['real'] = Tag.REAL
-        self.__words['booleano'] = Tag.BOOL
-        self.__words['verdade'] = Tag.LIT_TRUE
-        self.__words['falso'] = Tag.LIT_FALSE
+        self.__words[Tag.PROGRAM.value] = Tag.PROGRAM
+        self.__words[Tag.BEGIN.value] = Tag.BEGIN
+        self.__words[Tag.END.value] = Tag.END
+        self.__words[Tag.WRITE.value] = Tag.WRITE
+        self.__words[Tag.IF.value] = Tag.IF
+        self.__words[Tag.INT.value] = Tag.INT
+        self.__words[Tag.REAL.value] = Tag.REAL
+        self.__words[Tag.BOOL.value] = Tag.BOOL
+        self.__words[Tag.LIT_TRUE.value] = Tag.LIT_TRUE
+        self.__words[Tag.LIT_FALSE.value] = Tag.LIT_FALSE
 
     def __next_char(self):
         if (self.peek == '\n'):
@@ -34,44 +34,44 @@ class Lexer:
             next_char()
 
         match self.peek:
-            case '=':
+            case Tag.ASSIGN.value:
                 next_char()
-                if self.peek == '=':
+                if self.peek == Tag.ASSIGN.value:
                     next_char()
-                    return Token(Tag.EQ, '==', self.line)
-                return Token(Tag.ASSIGN, '=', self.line)
-            case '+':
+                    return Token(self.line, Tag.EQ)
+                return Token(self.line, Tag.ASSIGN)
+            case Tag.SUM.value:
                 next_char()
-                return Token(Tag.SUM, '+', self.line)
-            case '-':
+                return Token(self.line, Tag.SUM)
+            case Tag.SUB.value:
                 next_char()
-                return Token(Tag.SUB, '-', self.line)
-            case '*':
+                return Token(self.line, Tag.SUB)
+            case Tag.MUL.value:
                 next_char()
-                return Token(Tag.MUL, '*', self.line)
-            case '|':
+                return Token(self.line, Tag.MUL)
+            case Tag.OR.value:
                 next_char()
-                return Token(Tag.OR, '|', self.line)
-            case '<':
+                return Token(self.line, Tag.OR)
+            case Tag.LT.value:
                 next_char()                
-                return Token(Tag.LT, '<', self.line)
-            case '>':
+                return Token(self.line, Tag.LT)
+            case Tag.GT.value:
                 next_char()
-                return Token(Tag.GT, '>', self.line)
-            case ';':
+                return Token(self.line, Tag.GT)
+            case Tag.SEMI.value:
                 next_char()
-                return Token(Tag.SEMI, ';', self.line)
-            case '.':
+                return Token(self.line, Tag.SEMI)
+            case Tag.DOT.value:
                 next_char()
-                return Token(Tag.DOT, '.', self.line)
-            case '(':
+                return Token(self.line, Tag.DOT)
+            case Tag.LPAREN.value:
                 next_char()
-                return Token(Tag.LPAREN, '(', self.line)
-            case ')':
+                return Token(self.line, Tag.LPAREN)
+            case Tag.RPAREN.value:
                 next_char()
-                return Token(Tag.RPAREN, ')', self.line)
+                return Token(self.line, Tag.RPAREN)
             case Lexer.EOF_CHAR:
-                return Token(Tag.EOF, Lexer.EOF_CHAR, self.line)    
+                return Token(self.line, Tag.EOF)
             case _:
                 lex = ''
                 if self.peek.isdigit():
@@ -79,22 +79,22 @@ class Lexer:
                         lex += self.peek
                         next_char()
                     if self.peek != '.':
-                        return Token(Tag.LIT_INT, lex, self.line)
+                        return Token(self.line, Tag.LIT_INT, lex)
                     
                     while True:
                         lex += self.peek
                         next_char()
                         if not self.peek.isdigit():
                             break
-                    return Token(Tag.LIT_REAL, lex, self.line)
+                    return Token(self.line, Tag.LIT_REAL, lex)
                 elif ( self.peek.isalpha() or self.peek == '_' ):
                     while( self.peek.isalnum() or self.peek == '_' ):
                         lex += self.peek
                         next_char()
                     if ( lex in self.__words ):
-                        return Token(self.__words[lex], lex, self.line)
-                    return Token(Tag.ID, lex, self.line)
+                        return Token(self.line, self.__words[lex])
+                    return Token(self.line, Tag.ID, lex)
 
         unk = self.peek
         next_char()
-        return Token(Tag.UNK, unk, self.line)
+        return Token(self.line, Tag.UNK, unk)

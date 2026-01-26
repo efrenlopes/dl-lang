@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from dl.semantic.type import Type
 
 
-class Op(ABC):
+class Operand(ABC):
     @property
     def is_temp(self): return False
 
@@ -18,7 +18,7 @@ class Op(ABC):
 
 
 
-class Temp(Op):
+class Temp(Operand):
     __count = -1
     
     def __init__(self, type: Type):
@@ -42,7 +42,7 @@ class Temp(Op):
 
 
 
-class Const(Op):
+class Const(Operand):
     def __init__(self, type: Type, value):
         self.type = type
         self.value = value
@@ -61,7 +61,7 @@ class Const(Op):
 
 
 
-class Label(Op):
+class Label(Operand):
     __count = -1
     
     def __init__(self):
@@ -85,9 +85,9 @@ class Label(Op):
 
 
 
-class Empty(Op):
+class Empty(Operand):
     def __str__(self):
         return '<ic_empty>'
     
 
-Op.EMPTY = Empty()
+Operand.EMPTY = Empty()

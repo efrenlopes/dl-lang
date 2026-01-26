@@ -1,4 +1,5 @@
 from dl.semantic.type import Type
+from dl.inter.operator import Operator
 from dl.inter.ic import IC
 from dl.codegen.live_range import LiveRange
 from dl.codegen.reg_alloc import LinearScanRegisterAllocation
@@ -6,15 +7,15 @@ from dl.codegen.reg_alloc import LinearScanRegisterAllocation
 
 class X64CodeGenerator():
     OP_ARITH = {
-        '+': 'add', 
-        '-': 'sub', 
-        '*': 'imul', 
+        Operator.SUM: 'add', 
+        Operator.SUB: 'sub', 
+        Operator.MUL: 'imul', 
     }
 
     OP_REL = {
-        '==': 'sete', 
-        '<': 'setl', 
-        '>': 'setg'
+        Operator.EQ: 'sete', 
+        Operator.LT: 'setl', 
+        Operator.GT: 'setg'
     }
     
     # Registradores de 32bits de propósito geral preservados 
@@ -83,29 +84,32 @@ class X64CodeGenerator():
 
             self.code.append(f'\t# {instr}')
             match instr.op:
-                case 'label':
+                case Operator.LABEL:
                     self.code.append(f'\t{dest}:')
                 
-                case 'goto':
+                case Operator.GOTO:
                     self.code.append(f'\tjmp {dest}')
 
-                case 'if':
+                case Operator.IF:
                     self.code.append(f'\tmov {self.ACC_REG}, {arg1}')
                     self.code.append(f'\tcmp {self.ACC_REG}, 0')
                     self.code.append(f'\tjne {dest}')
 
-                case 'iffalse':
+                case Operator.IFFALSE:
                     self.code.append(f'\tmov {self.ACC_REG}, {arg1}')
                     self.code.append(f'\tcmp {self.ACC_REG}, 0')
                     self.code.append(f'\tje {dest}')
                 
-                case 'print':
+                case Operator.PRINT:
                     self.code.append(f'\tmov {self.CALL_ARG_REG}, {arg1}')
                     self.code.append('\tcall print_int')
                 
-                case '=':  # Assign
+                case Operator.MOVE:  # Assign
                     self.code.append(f'\tmov {self.ACC_REG}, {arg1}')
                     self.code.append(f'\tmov {dest}, {self.ACC_REG}')
+                
+                case Operator.CONVERT:
+                    pass
                 
                 case _:
                     if instr.op in self.OP_ARITH: # Operações aritméticas

@@ -33,7 +33,7 @@ class Parser:
     def __match(self, tag: Tag):
         if self.lookahead.tag == tag:
             return self.__move()
-        self.__error(self.lookahead.line, f'"{self.lookahead.lexeme}" inesperado')
+        self.__error(self.lookahead.line, f'Esperado "{tag.value}", mas encontrado "{self.lookahead.tag.value}"')
 
     def __parse(self):
         root = self.__program()

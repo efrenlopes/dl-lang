@@ -1,46 +1,31 @@
-from dl.inter.operand import Op
+from dl.inter.operator import Operator
+from dl.inter.operand import Operand
 
 class Instr:
-    def __init__(self, op: str, arg1: Op, arg2: Op, result: Op):
+    def __init__(self, op: Operator, arg1: Operand, arg2: Operand, result: Operand):
         self.op = op
         self.arg1 = arg1
         self.arg2 = arg2
         self.result = result
             
-    @property
-    def is_label(self):
-        return self.op == 'label'
-    
-    @property
-    def is_uncond_jump(self):
-        return self.op == 'goto'
-    
-    @property
-    def is_cond_jump(self):
-        return self.op in ('if', 'iffalse')
-    
-    @property
-    def is_jump(self):
-        return self.op in ('goto', 'if', 'iffalse')
-
     def __str__(self):
         op = self.op
         arg1 = self.arg1
         arg2 = self.arg2
         result = self.result
         
-        match self.op:
-            case '=': 
-                return f'{result} = {arg1}'
-            case 'label': 
+        match op:
+            case Operator.MOVE: 
+                return f'{result} {op} {arg1}'
+            case Operator.LABEL: 
                 return f'{result}:'
-            case 'if' | 'iffalse': 
+            case Operator.IF | Operator.IFFALSE: 
                 return f'{op} {arg1} goto {result}'
-            case 'goto': 
+            case Operator.GOTO: 
                 return f'{op} {result}'
-            case 'convert': 
+            case Operator.CONVERT: 
                 return f'{result} = {op} {arg1}'
-            case 'print': 
+            case Operator.PRINT: 
                 return f'{op} {arg1}'
             case _: 
                 return f'{result} = {arg1} {op} {arg2}'

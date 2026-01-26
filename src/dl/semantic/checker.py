@@ -30,7 +30,7 @@ class Checker(Visitor):
         for var in self.__env_top.var_list():
             info = self.__env_top.get_local(var)
             if not info.used:
-                print(f"Aviso: variável {var} declarada na linha {info.declaration_line} mas não usada")
+                print(f'Aviso: variável "{var}" declarada na linha {info.declaration_line} mas não usada')
         self.__env_top = saved_env
 
 
@@ -60,7 +60,7 @@ class Checker(Visitor):
         #var
         info = self.__env_top.get(node.var.name)
         if not info:
-            self.__error(node.var.line, f'{node.var.name} não declarada!')
+            self.__error(node.var.line, f'"{node.var.name}" não declarada!')
         else:
             node.var.type = info.type
             node.var.scope = info.scope
@@ -98,13 +98,13 @@ class Checker(Visitor):
     def visit_var_node(self, node: VarNode):
         info = self.__env_top.get(node.name)
         if not info:
-            self.__error(node.line, f'{node.name} não declarada!')
+            self.__error(node.line, f'"{node.name}" não declarada!')
         else:
             node.type = info.type
             node.scope = info.scope
             info.used = True
             if not info.initialized:
-                    self.__error(node.line, f'{node.name} não inicializada!')    
+                    self.__error(node.line, f'"{node.name}" não inicializada!')    
 
 
     def visit_literal_node(self, node: LiteralNode):
@@ -117,13 +117,13 @@ class Checker(Visitor):
                 if Type.MIN_INT <= value <= Type.MAX_INT:
                     node.value = value
                 else:
-                    self.__error(node.line, f'O valor {value} está fora da faixa de valores dos inteiros')
+                    self.__error(node.line, f'O valor {value} está fora da faixa de valores dos inteiros.')
             case Type.REAL:
                 value = float(node.raw_value)
                 if Type.MIN_REAL <= value <= Type.MAX_REAL:
                     node.value = value
                 else:
-                    self.__error(node.line, f'O valor {value} está fora da faixa de valores dos reais')            
+                    self.__error(node.line, f'O valor {value} está fora da faixa de valores dos reais.')
 
 
 
@@ -134,23 +134,27 @@ class Checker(Visitor):
         t1 = node.expr1.type
         t2 = node.expr2.type
         common_type = Type.common_type(t1, t2)
+
+        if not common_type:
+            self.__error(node.line, f'Operando indefinido na operação "{node.operator}".')
+            return
         
         match node.operator:
-            case '|':
+            case Tag.OR:
                 if t1.is_boolean and t2.is_boolean:
                     node.type = Type.BOOL
-            case '==':
+            case Tag.EQ:
                 if common_type:
                     node.type = Type.BOOL
-            case '+' | '-' | '*':
+            case Tag.SUM | Tag.SUB | Tag.MUL:
                 if t1.is_numeric and t2.is_numeric:
                     node.type = common_type
-            case '>' | '<':
+            case Tag.GT | Tag.LT:
                 if t1.is_numeric and t2.is_numeric:
                     node.type = Type.BOOL
         
         if not node.type:
-            self.__error(node.line, f'Operação {node.operator} com operandos inválidos')
+            self.__error(node.line, f'Operação "{node.operator}" com operandos inválidos.')
         else:
             node.expr1 = Checker.widening(node.expr1, common_type)
             node.expr2 = Checker.widening(node.expr2, common_type)

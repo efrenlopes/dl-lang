@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from dl.lex.tag import Tag
 from dl.lex.lexer import Token
 from dl.tree.visitor import Visitor
 
@@ -66,7 +67,12 @@ class LiteralNode(ExprNode):
 
     @property
     def raw_value(self):
-        return self.token.lexeme
+        if self.token.tag == Tag.LIT_TRUE:
+            return Tag.LIT_TRUE.value
+        elif self.token.tag == Tag.LIT_FALSE:
+            return Tag.LIT_FALSE.value
+        else:
+            return self.token.lexeme
     
     def accept(self, visitor: Visitor):
         return visitor.visit_literal_node(self)
@@ -86,15 +92,15 @@ class BinaryNode(ExprNode):
 
     @property
     def operator(self):
-        return self.token.lexeme
+        return self.token.tag
     
     def accept(self, visitor: Visitor):
         return visitor.visit_binary_node(self)
 
     def __str__(self):
         if self.type:
-            return f'{self.operator}:{self.type}'
-        return self.operator
+            return f'{self.operator.value}:{self.type}'
+        return self.operator.value
 
 
 
@@ -105,16 +111,15 @@ class ConvertNode(ExprNode):
 
     @property
     def operator(self):
-        if self.type:
-            return f'convert:{self.type}'        
-        return 'convert'
+        return Tag.CONVERT
     
     def accept(self, visitor: Visitor):
         return visitor.visit_convert_node(self)
 
     def __str__(self):
-        return self.operator
-
+        if self.type:
+            return f'{Tag.CONVERT.name}:{self.type}'        
+        return Tag.CONVERT.name
 
 
 
