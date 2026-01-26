@@ -16,7 +16,7 @@ if __name__ == '__main__':
     file_input = sys.argv[1]
 
     #Análise Léxica
-    lexer = Lexer(file_input)
+    lexer = Lexer(open(file_input, 'r'))
 
     #Análise Sintática
     parser = Parser(lexer)

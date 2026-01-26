@@ -4,8 +4,8 @@ from dl.lex.token import Token
 class Lexer:
     EOF_CHAR = ''
 
-    def __init__(self, file_name: str):
-        self.__file = open(file_name, 'r')
+    def __init__(self, input_stream):
+        self.__input = input_stream
         self.line = 1
         self.peek = ' '
         #Keywords
@@ -24,7 +24,7 @@ class Lexer:
     def __next_char(self):
         if (self.peek == '\n'):
             self.line += 1
-        self.peek = self.__file.read(1)
+        self.peek = self.__input.read(1)
         return self.peek
 
     def next_token(self):
