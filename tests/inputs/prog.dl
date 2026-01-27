@@ -1,8 +1,16 @@
 programa area_circulo inicio
-  inteiro a;
-  a = 0;
-  enquanto (a < 10) inicio
-    escreva(a);
-    a = a + 2;
+  inteiro raio;
+  booleano positivo;
+  raio = 5;
+  positivo = (raio > 1 | raio == 1);
+  se (positivo == verdade) inicio
+    real area;
+    area = 3.1415 * raio * raio;
+    enquanto (area < 300) inicio
+      escreva(area);
+      raio = raio + 1;
+      area = 3.1415 * raio * raio;
+    fim;
+    escreva(area);    
   fim;
 fim.
