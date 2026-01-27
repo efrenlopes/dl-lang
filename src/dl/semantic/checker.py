@@ -53,36 +53,20 @@ class Checker(Visitor):
             self.__error(node.line, f'"{var_name}" já declarada!')
 
 
-    @staticmethod
-    def assign_type_rules(var_type: Type, expr_type: Type):
-        if not var_type or not expr_type:
-            return None
-        if var_type == expr_type:
-            return var_type
-        elif var_type.is_numeric and expr_type.is_numeric:
-            if var_type.rank > expr_type.rank:
-                return var_type
-        return None
-
-
     def visit_assign_node(self, node: AssignNode):
-        #var
+        node.expr.accept(self)
         info = self.__env_top.get(node.var.name)
-        if not info:
-            self.__error(node.var.line, f'"{node.var.name}" não declarada!')
-        else:
+        if info:
             node.var.type = info.type
             node.var.scope = info.scope
-            info.initialized = True
-        #expr
-        node.expr.accept(self)
-        #Erro
-        if node.var.type != Type.common_type(node.var.type, node.expr.type):
-            self.__error(node.line, 'Tipo da variável incompatível com o tipo da expressão')
-        else:            
-            #widen
-            node.expr = Checker.widening(node.expr, node.var.type)
-            info.initialized = True
+            if node.var.type != Type.common_type(node.var.type, node.expr.type):
+                self.__error(node.line, 'Tipo da variável incompatível com o tipo da expressão')
+            else:            
+                #widen
+                node.expr = Checker.widening(node.expr, node.var.type)
+                info.initialized = True
+        else:
+            self.__error(node.var.line, f'"{node.var.name}" não declarada!')
 
     @staticmethod
     def widening(expr: ExprNode, type: Type):
@@ -113,7 +97,7 @@ class Checker(Visitor):
             node.scope = info.scope
             info.used = True
             if not info.initialized:
-                    self.__error(node.line, f'"{node.name}" não inicializada!')    
+                self.__error(node.line, f'"{node.name}" não inicializada!')    
 
 
     def visit_literal_node(self, node: LiteralNode):

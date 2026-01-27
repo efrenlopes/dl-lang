@@ -13,10 +13,10 @@ class LiveRange:
     
     @staticmethod
     def compute_live_ranges(ic: IC):
-        live_ranges = {}
+        int_live_ranges = {}
+        double_live_ranges = {}
         for i, instr in enumerate(ic):
             vars = []
-
             if instr.arg1.is_temp:
                 vars.append(instr.arg1)
             if instr.arg2.is_temp:
@@ -25,9 +25,10 @@ class LiveRange:
                 vars.append(instr.result)
 
             for var in vars:
+                live_ranges = double_live_ranges if var.type.is_float else int_live_ranges
                 if var not in live_ranges:
                     live_ranges[var] = LiveRange()
                 if live_ranges[var].start is None:
                     live_ranges[var].start = i
                 live_ranges[var].end = i        
-        return live_ranges
+        return int_live_ranges, double_live_ranges

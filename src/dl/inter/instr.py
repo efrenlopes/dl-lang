@@ -29,3 +29,6 @@ class Instr:
                 return f'{op} {arg1}'
             case _: 
                 return f'{result} {Operator.MOVE} {arg1} {op} {arg2}'
+
+    def __repr__(self):
+        return f'<Instr: {self.op}>'
