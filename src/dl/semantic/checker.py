@@ -59,12 +59,12 @@ class Checker(Visitor):
         if info:
             node.var.type = info.type
             node.var.scope = info.scope
+            info.initialized = True
             if node.var.type != Type.common_type(node.var.type, node.expr.type):
                 self.__error(node.line, 'Tipo da variável incompatível com o tipo da expressão')
             else:            
                 #widen
                 node.expr = Checker.widening(node.expr, node.var.type)
-                info.initialized = True
         else:
             self.__error(node.var.line, f'"{node.var.name}" não declarada!')
 
@@ -140,16 +140,16 @@ class Checker(Visitor):
             return
         
         match node.operator:
-            case Tag.OR:
+            case Tag.OR | Tag.AND:
                 if t1.is_boolean and t2.is_boolean:
                     node.type = Type.BOOL
-            case Tag.EQ:
+            case Tag.EQ | Tag.NE:
                 if common_type:
                     node.type = Type.BOOL
             case Tag.SUM | Tag.SUB | Tag.MUL | Tag.DIV | Tag.MOD:
                 if t1.is_numeric and t2.is_numeric:
                     node.type = common_type
-            case Tag.GT | Tag.LT:
+            case Tag.LT | Tag.LE | Tag.GT | Tag.GE:
                 if t1.is_numeric and t2.is_numeric:
                     node.type = Type.BOOL
         

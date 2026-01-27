@@ -15,8 +15,12 @@ class Operator(Enum):
     DIV = '/'
     MOD = '%'
     EQ = '=='
-    GT = '>'
+    NE = '!='
     LT = '<'
+    LE = '<='
+    GT = '>'
+    GE = '>='
+    
 
     def __str__(self):
         return self.value

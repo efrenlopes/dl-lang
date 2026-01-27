@@ -41,6 +41,13 @@ class Lexer:
                     next_char()
                     return Token(self.line, Tag.EQ)
                 return Token(self.line, Tag.ASSIGN)
+            case '!':
+                next_char()
+                if self.peek == Tag.NE.value[1]:
+                    next_char()
+                    return Token(self.line, Tag.NE)
+                return Token(self.line, Tag.UNK, ';')
+
             case Tag.SUM.value:
                 next_char()
                 return Token(self.line, Tag.SUM)
@@ -59,11 +66,20 @@ class Lexer:
             case Tag.OR.value:
                 next_char()
                 return Token(self.line, Tag.OR)
+            case Tag.AND.value:
+                next_char()
+                return Token(self.line, Tag.AND)
             case Tag.LT.value:
-                next_char()                
+                next_char()
+                if self.peek == Tag.LE.value[1]:
+                    next_char()
+                    return Token(self.line, Tag.LE)
                 return Token(self.line, Tag.LT)
             case Tag.GT.value:
                 next_char()
+                if self.peek == Tag.GE.value[1]:
+                    next_char()
+                    return Token(self.line, Tag.GE)
                 return Token(self.line, Tag.GT)
             case Tag.SEMI.value:
                 next_char()

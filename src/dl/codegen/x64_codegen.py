@@ -24,14 +24,20 @@ class X64CodeGenerator():
 
     OP_REL_INT = {
         Operator.EQ: 'sete',
-        Operator.LT: 'setl', 
-        Operator.GT: 'setg'
+        Operator.NE: 'setne',
+        Operator.LT: 'setl',
+        Operator.LE: 'setle',
+        Operator.GT: 'setg',
+        Operator.GE: 'setge'
     }
 
     OP_REL_DOUBLE = {
         Operator.EQ: 'sete',
-        Operator.LT: 'setb', 
-        Operator.GT: 'seta'
+        Operator.NE: 'setne',
+        Operator.LT: 'setb',
+        Operator.LE: 'setbe',
+        Operator.GT: 'seta',
+        Operator.GE: 'setae',
     }
 
     OP_ARITH = {
@@ -179,7 +185,7 @@ class X64CodeGenerator():
                         self.code.append(f'\t{self.MOVE[type]} {self.ACC_REG[type]}, {arg1}')
                         self.code.append(f'\t{self.OP_ARITH[type][instr.op]} {self.ACC_REG[type]}, {arg2}')
                         self.code.append(f'\t{self.MOVE[type]} {dest}, {self.ACC_REG[type]}')
-                    elif instr.op in (Operator.EQ, Operator.LT, Operator.GT):
+                    elif instr.op in (Operator.EQ, Operator.NE, Operator.LT, Operator.LE, Operator.GT, Operator.GE):
                         self.code.append(f'\t{self.MOVE[type]} {self.ACC_REG[type]}, {arg1}')
                         self.code.append(f'\t{self.CMP[type]} {self.ACC_REG[type]}, {arg2}')
                         self.code.append(f'\t{self.OP_REL[type][instr.op]} al')

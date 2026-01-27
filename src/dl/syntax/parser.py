@@ -163,22 +163,29 @@ class Parser:
         return WriteNode(write_tok, expr)
 
     def __expr(self):
-        expr = self.__equal()
+        expr = self.__land()
         while self.lookahead.tag == Tag.OR:
+            op_tok = self.__move()
+            expr = BinaryNode(op_tok, expr, self.__land())
+        return expr
+
+    def __land(self):
+        expr = self.__equal()
+        while self.lookahead.tag == Tag.AND:
             op_tok = self.__move()
             expr = BinaryNode(op_tok, expr, self.__equal())
         return expr
 
     def __equal(self):
         expr = self.__rel()
-        while self.lookahead.tag == Tag.EQ:
+        while self.lookahead.tag in (Tag.EQ, Tag.NE):
             op_tok = self.__move()
             expr = BinaryNode(op_tok, expr, self.__rel())
         return expr
 
     def __rel(self):
         expr = self.__arith()
-        while self.lookahead.tag in (Tag.LT, Tag.GT):
+        while self.lookahead.tag in (Tag.LT, Tag.LE, Tag.GT, Tag.GE):
             op_tok = self.__move()
             expr = BinaryNode(op_tok, expr, self.__arith())
         return expr

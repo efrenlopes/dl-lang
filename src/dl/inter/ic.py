@@ -29,8 +29,11 @@ class IC(Visitor):
         Tag.DIV: Operator.DIV,
         Tag.MOD: Operator.MOD,
         Tag.EQ : Operator.EQ,
+        Tag.NE : Operator.NE,
         Tag.LT: Operator.LT,
-        Tag.GT: Operator.GT
+        Tag.LE: Operator.LE,
+        Tag.GT: Operator.GT,
+        Tag.GE: Operator.GE
     }
 
     def __init__(self, ast: AST = None):
@@ -128,6 +131,25 @@ class IC(Visitor):
             self.add_instr(Instr(Operator.GOTO, EMPTY, EMPTY, lbl_end))
             #end
             self.add_instr(Instr(Operator.LABEL, EMPTY, EMPTY, lbl_end))
+        elif node.token.tag == Tag.AND:
+            #labels
+            lbl_false = Label()
+            lbl_true = Label()
+            lbl_end = Label()
+            #tests
+            self.add_instr(Instr(Operator.IFFALSE, arg1, EMPTY, lbl_false))
+            self.add_instr(Instr(Operator.IFFALSE, arg2, EMPTY, lbl_false))
+            self.add_instr(Instr(Operator.GOTO, EMPTY, EMPTY, lbl_true))
+            #true
+            self.add_instr(Instr(Operator.LABEL, EMPTY, EMPTY, lbl_true))
+            self.add_instr(Instr(Operator.MOVE, Const(Type.BOOL, True), EMPTY, temp))
+            self.add_instr(Instr(Operator.GOTO, EMPTY, EMPTY, lbl_end))
+            #false
+            self.add_instr(Instr(Operator.LABEL, EMPTY, EMPTY, lbl_false))
+            self.add_instr(Instr(Operator.MOVE, Const(Type.BOOL, False), EMPTY, temp))
+            self.add_instr(Instr(Operator.GOTO, EMPTY, EMPTY, lbl_end))
+            #end
+            self.add_instr(Instr(Operator.LABEL, EMPTY, EMPTY, lbl_end))            
         else:   
             self.add_instr(Instr(IC.__OP_MAP[node.operator], arg1, arg2, temp))
         
@@ -191,20 +213,22 @@ class IC(Visitor):
         Operator.DIV: lambda a, b: a / b if isinstance(a, float) else a//b,
         Operator.MOD: lambda a, b: a % b,
         Operator.EQ: lambda a, b: a == b,
+        Operator.NE: lambda a, b: a != b,
         Operator.LT: lambda a, b: a < b,
+        Operator.LE: lambda a, b: a <= b,
         Operator.GT: lambda a, b: a > b,
+        Operator.GE: lambda a, b: a >= b,
     }
 
     @staticmethod
     def operate(op: str, value1, value2):
         value = IC.OPS[op](value1, value2)
-        if isinstance(value, int):
+        if isinstance(value, bool):
+            return value
+        elif isinstance(value, int):
             return c_int32(value).value
         elif isinstance(value, float):
             return c_double(value).value
-        elif isinstance(value, bool):
-            return value
-        
 
     def interpret(self):
         self.update_label_index()
@@ -244,7 +268,7 @@ class IC(Visitor):
                     if isinstance(value1, float):
                         print(f'output: {value1:.4f}')
                     else:
-                        print(f'output: {value1}')
+                        print(f'output: {int(value1)}')
                 case Operator.CONVERT:
                     vars[result] = float(value1)
                 case Operator.MOVE:
@@ -252,4 +276,4 @@ class IC(Visitor):
                 case _:
                     vars[result] = IC.operate(op, value1, value2)
                 
-            index += 1        
+            index += 1
