@@ -31,8 +31,39 @@ class Lexer:
     def next_token(self):
         next_char = self.__next_char
 
-        while self.peek in [' ', '\n', '\t', '\r']:
-            next_char()
+        # Ignora comentários e espaços em braco
+        while True:
+            # 1. Ignora espaços
+            while self.peek in [' ', '\n', '\t', '\r']:
+                next_char()            
+            
+            # 2. Verifica se pode ser um comentário
+            if self.peek == '/':
+                next_char()
+                # 2.1. Comentário de linha: //
+                if self.peek == '/':
+                    while self.peek != '\n' and self.peek != Lexer.EOF_CHAR: 
+                        next_char()
+                # 2.2. Comentário de bloco: /*
+                elif self.peek == '*':
+                    next_char()
+                    while self.peek != Lexer.EOF_CHAR:
+                        if self.peek == '*':
+                            next_char()
+                            if self.peek == '/':
+                                next_char()
+                                break
+                        else:
+                            next_char()
+                    # 2.2.1 Comentário de bloco não fechado
+                    else:
+                        print('Erro léxico: comentário não fechado')
+                # 2.3. Token de divisão    
+                else:
+                    return Token(self.line, Tag.DIV)
+            else:
+                break
+
 
         match self.peek:
             case Tag.ASSIGN.value:
