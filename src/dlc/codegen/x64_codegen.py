@@ -178,7 +178,7 @@ class X64CodeGenerator():
                     self.code.append(f'\tcall {self.READ[l_type]}')
                     self.code.append(f'\t{self.MOVE[l_type]} {result}, {self.ACC_REG[l_type]}')
 
-                case Operator.MOVE:  # Assign
+                case Operator.MOVE | Operator.PLUS:
                     self.code.append(f'\t{self.MOVE[r_type]} {self.ACC_REG[r_type]}, {arg1}')
                     self.code.append(f'\t{self.MOVE[r_type]} {result}, {self.ACC_REG[r_type]}')
                 
@@ -188,22 +188,20 @@ class X64CodeGenerator():
 
                 case Operator.MINUS:
                     self.code.append(f'\t{self.MOVE[r_type]} {self.ACC_REG[r_type]}, {arg1}')
-                    self.code.append(f'\tneg {self.ACC_REG[l_type]}')
-                    self.code.append(f'\t{self.MOVE[l_type]} {result}, {self.ACC_REG[l_type]}')
+                    self.code.append(f'\tneg {self.ACC_REG[r_type]}')
+                    self.code.append(f'\t{self.MOVE[l_type]} {result}, {self.ACC_REG[r_type]}')
 
                 case Operator.NOT:
                     self.code.append(f'\t{self.MOVE[r_type]} {self.ACC_REG[r_type]}, {arg1}')
-                    self.code.append(f'\txor {self.ACC_REG[l_type]}, 1')
-                    self.code.append(f'\t{self.MOVE[l_type]} {result}, {self.ACC_REG[l_type]}')
-                
-                case Operator.PLUS:
-                    pass
+                    self.code.append(f'\txor {self.ACC_REG[r_type]}, 1')
+                    self.code.append(f'\t{self.MOVE[l_type]} {result}, {self.ACC_REG[r_type]}')
+                    
 
                 case _:
                     if instr.op in (Operator.SUM, Operator.SUB, Operator.MUL):
                         self.code.append(f'\t{self.MOVE[r_type]} {self.ACC_REG[r_type]}, {arg1}')
                         self.code.append(f'\t{self.OP_ARITH[r_type][instr.op]} {self.ACC_REG[r_type]}, {arg2}')
-                        self.code.append(f'\t{self.MOVE[r_type]} {result}, {self.ACC_REG[r_type]}')
+                        self.code.append(f'\t{self.MOVE[l_type]} {result}, {self.ACC_REG[r_type]}')
                     elif instr.op in (Operator.EQ, Operator.NE, Operator.LT, Operator.LE, Operator.GT, Operator.GE):
                         self.code.append(f'\t{self.MOVE[r_type]} {self.ACC_REG[r_type]}, {arg1}')
                         self.code.append(f'\t{self.CMP[r_type]} {self.ACC_REG[r_type]}, {arg2}')
@@ -214,7 +212,7 @@ class X64CodeGenerator():
                         if r_type == Type.REAL:
                             self.code.append(f'\t{self.MOVE[r_type]} {self.ACC_REG[r_type]}, {arg1}')
                             self.code.append(f'\t{self.OP_ARITH[r_type][instr.op]} {self.ACC_REG[r_type]}, {arg2}')
-                            self.code.append(f'\t{self.MOVE[r_type]} {result}, {self.ACC_REG[r_type]}')
+                            self.code.append(f'\t{self.MOVE[l_type]} {result}, {self.ACC_REG[r_type]}')
                         else:
                             self.code.append(f'\tmov eax, {arg1}')
                             self.code.append('\tcdq')
@@ -278,7 +276,7 @@ class X64CodeGenerator():
             '    push rbp',
             '    mov rbp, rsp',
             '    sub rsp, 16',
-            '    ',
+            '',
             '    # Exibe o prompt "input: "',
             '    lea rdi, [rip + str_input_prompt]',
             '    xor eax, eax',
@@ -289,7 +287,7 @@ class X64CodeGenerator():
             '    lea rsi, [rbp - 4]',
             '    xor eax, eax',
             '    call scanf@PLT',
-            '    ',
+            '',
             '    mov eax, [rbp - 4]',
             '    leave',
             '    ret',
@@ -302,27 +300,27 @@ class X64CodeGenerator():
             '    push rbp',
             '    mov rbp, rsp',
             '    sub rsp, 16',
-            '    ',
+            '',
             '    # Exibe o prompt "input: "',
             '    lea rdi, [rip + str_input_prompt]',
             '    xor eax, eax',
             '    call printf@PLT',
-            '    ',
+            '',
             '    # Realiza a leitura',
             '    lea rdi, [rip + fmt_in_double]',
             '    lea rsi, [rbp - 8]',
             '    xor eax, eax',
             '    call scanf@PLT',
-            '    ',
+            '',
             '    movsd xmm0, [rbp - 8]',
             '    leave',
             '    ret',            '',
             '.section .rodata',
             '\tstr_input_prompt: .string "input: "',
-            '\tfmt_in_int:         .string "%d"',
-            '\tfmt_in_double:      .string "%lf"',
-            '\tfmt_out_int:     .string "output: %d\\n"',
-            '\tfmt_out_double:  .string "output: %.4lf\\n"',
+            '\tfmt_in_int:       .string "%d"',
+            '\tfmt_in_double:    .string "%lf"',
+            '\tfmt_out_int:      .string "output: %d\\n"',
+            '\tfmt_out_double:   .string "output: %.4lf\\n"',
         ])
 
         for value in self.const_map:

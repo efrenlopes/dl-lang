@@ -13,18 +13,8 @@ programa primo inicio
     enquanto ( i < num & eh_primo == verdade) inicio
         se (num%i == 0)
             eh_primo = falso;
-        i = i+1;
+        i = i + +1;
     fim;
 
-    escreva(eh_primo);
-
-    real d;
-    d = i;
-    escreva(d);
-    
-    i = ---5;
-    escreva(i);
-
-    eh_primo = !eh_primo;
-    escreva(eh_primo);
+    escreva(!!eh_primo);
 fim.
