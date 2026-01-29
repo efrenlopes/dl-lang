@@ -341,7 +341,8 @@ class IC(Visitor):
                                 i = float(i)
                         vars[result] = i
                     except ValueError:
-                        print('Entrada de dados inválida! Programa encerrado.')
+                        print('Entrada de dados inválida! Interpretação encerrada.')
+                        return
                 case Operator.CONVERT | Operator.PLUS | Operator.MINUS | Operator.NOT:
                     vars[result] = IC.operate_unary(op, value1)
                 case Operator.MOVE:
