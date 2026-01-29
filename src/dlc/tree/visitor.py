@@ -37,6 +37,9 @@ class Visitor(ABC):
     
     @abstractmethod
     def visit_binary_node(self, node): pass
-    
+
+    @abstractmethod
+    def visit_unary_node(self, node): pass
+
     @abstractmethod
     def visit_convert_node(self, node): pass

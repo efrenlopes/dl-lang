@@ -21,6 +21,9 @@ class Operator(Enum):
     LE = '<='
     GT = '>'
     GE = '>='
+    PLUS = 'plus'
+    MINUS = 'minus'
+    NOT = 'not'
     
 
     def __str__(self):

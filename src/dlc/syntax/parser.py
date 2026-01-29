@@ -13,6 +13,7 @@ from dlc.tree.nodes import (
     WriteNode,
     ReadNode,
     BinaryNode,
+    UnaryNode,
     LiteralNode,
 )
 import colorama
@@ -220,11 +221,18 @@ class Parser:
         return expr
 
     def __term(self):
-        expr = self.__factor()
+        expr = self.__unary()
         while self.lookahead.tag in (Tag.MUL, Tag.DIV, Tag.MOD):
             op_tok = self.__move()
-            expr = BinaryNode(op_tok, expr, self.__factor())
+            expr = BinaryNode(op_tok, expr, self.__unary())
         return expr
+
+    def __unary(self):
+        if self.lookahead.tag in (Tag.SUM, Tag.SUB, Tag.NOT):
+            op = self.__move()
+            return UnaryNode(op, self.__unary())
+        else:
+            return self.__factor()
 
     def __factor(self):
         match = self.__match

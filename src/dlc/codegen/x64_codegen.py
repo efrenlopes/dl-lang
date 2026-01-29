@@ -71,8 +71,8 @@ class X64CodeGenerator():
     }
 
     # Registradores de 32bits de propósito geral preservados 
-    INT_REGISTERS = ['r12d', 'r13d', 'r14d', 'r15d'] #[r12d..r15d]
-    DOUBLE_REGISTERS = ['xmm8', 'xmm9', 'xmm10', 'xmm11'] #[xmm8...xmm15]
+    INT_REGISTERS = ['r12d']#['r12d', 'r13d', 'r14d', 'r15d']
+    DOUBLE_REGISTERS = ['xmm8'] #['xmm8', 'xmm9', 'xmm10', 'xmm11', 'xmm12', 'xmm13', 'xmm14', 'xmm15']
 
 
 
@@ -148,7 +148,9 @@ class X64CodeGenerator():
             arg1 = self.__resolve_arg(instr.arg1)
             arg2 = self.__resolve_arg(instr.arg2)
             if arg1:
-                type = instr.arg1.type
+                r_type = instr.arg1.type
+            if instr.result and instr.result.is_temp:
+                l_type = instr.result.type
 
             self.code.append(f'\t# {instr}')
             match instr.op:
@@ -159,49 +161,60 @@ class X64CodeGenerator():
                     self.code.append(f'\tjmp {result}')
 
                 case Operator.IF:
-                    self.code.append(f'\t{self.MOVE[type]} {self.ACC_REG[type]}, {arg1}')
-                    self.code.append(f'\tcmp {self.ACC_REG[type]}, 0')
+                    self.code.append(f'\t{self.MOVE[r_type]} {self.ACC_REG[r_type]}, {arg1}')
+                    self.code.append(f'\tcmp {self.ACC_REG[r_type]}, 0')
                     self.code.append(f'\tjne {result}')
 
                 case Operator.IFFALSE:
-                    self.code.append(f'\t{self.MOVE[type]} {self.ACC_REG[type]}, {arg1}')
-                    self.code.append(f'\tcmp {self.ACC_REG[type]}, 0')
+                    self.code.append(f'\t{self.MOVE[r_type]} {self.ACC_REG[r_type]}, {arg1}')
+                    self.code.append(f'\tcmp {self.ACC_REG[r_type]}, 0')
                     self.code.append(f'\tje {result}')
                 
                 case Operator.PRINT:
-                    self.code.append(f'\t{self.MOVE[type]} {self.CALL_ARG_REG[type]}, {arg1}')
-                    self.code.append(f'\tcall {self.PRINT[type]}')
+                    self.code.append(f'\t{self.MOVE[r_type]} {self.CALL_ARG_REG[r_type]}, {arg1}')
+                    self.code.append(f'\tcall {self.PRINT[r_type]}')
                 
                 case Operator.READ:
-                    type = instr.result.type
-                    self.code.append(f'\tcall {self.READ[type]}')
-                    self.code.append(f'\t{self.MOVE[type]} {result}, {self.ACC_REG[type]}')
+                    self.code.append(f'\tcall {self.READ[l_type]}')
+                    self.code.append(f'\t{self.MOVE[l_type]} {result}, {self.ACC_REG[l_type]}')
 
                 case Operator.MOVE:  # Assign
-                    self.code.append(f'\t{self.MOVE[type]} {self.ACC_REG[type]}, {arg1}')
-                    self.code.append(f'\t{self.MOVE[type]} {result}, {self.ACC_REG[type]}')
+                    self.code.append(f'\t{self.MOVE[r_type]} {self.ACC_REG[r_type]}, {arg1}')
+                    self.code.append(f'\t{self.MOVE[r_type]} {result}, {self.ACC_REG[r_type]}')
                 
                 case Operator.CONVERT:
-                    self.code.append(f'\t{self.MOVE[Type.INT]} {self.ACC_REG[Type.INT]}, {arg1}')
-                    self.code.append(f'\tcvtsi2sd {self.ACC_REG[Type.REAL]}, {self.ACC_REG[Type.INT]}')
-                    self.code.append(f'\t{self.MOVE[Type.REAL]} {result}, {self.ACC_REG[Type.REAL]}')
+                    self.code.append(f'\t{self.MOVE[r_type]} {self.ACC_REG[r_type]}, {arg1}')
+                    self.code.append(f'\tcvtsi2sd {result}, {self.ACC_REG[r_type]}')
+
+                case Operator.MINUS:
+                    self.code.append(f'\t{self.MOVE[r_type]} {self.ACC_REG[r_type]}, {arg1}')
+                    self.code.append(f'\tneg {self.ACC_REG[l_type]}')
+                    self.code.append(f'\t{self.MOVE[l_type]} {result}, {self.ACC_REG[l_type]}')
+
+                case Operator.NOT:
+                    self.code.append(f'\t{self.MOVE[r_type]} {self.ACC_REG[r_type]}, {arg1}')
+                    self.code.append(f'\txor {self.ACC_REG[l_type]}, 1')
+                    self.code.append(f'\t{self.MOVE[l_type]} {result}, {self.ACC_REG[l_type]}')
                 
+                case Operator.PLUS:
+                    pass
+
                 case _:
                     if instr.op in (Operator.SUM, Operator.SUB, Operator.MUL):
-                        self.code.append(f'\t{self.MOVE[type]} {self.ACC_REG[type]}, {arg1}')
-                        self.code.append(f'\t{self.OP_ARITH[type][instr.op]} {self.ACC_REG[type]}, {arg2}')
-                        self.code.append(f'\t{self.MOVE[type]} {result}, {self.ACC_REG[type]}')
+                        self.code.append(f'\t{self.MOVE[r_type]} {self.ACC_REG[r_type]}, {arg1}')
+                        self.code.append(f'\t{self.OP_ARITH[r_type][instr.op]} {self.ACC_REG[r_type]}, {arg2}')
+                        self.code.append(f'\t{self.MOVE[r_type]} {result}, {self.ACC_REG[r_type]}')
                     elif instr.op in (Operator.EQ, Operator.NE, Operator.LT, Operator.LE, Operator.GT, Operator.GE):
-                        self.code.append(f'\t{self.MOVE[type]} {self.ACC_REG[type]}, {arg1}')
-                        self.code.append(f'\t{self.CMP[type]} {self.ACC_REG[type]}, {arg2}')
-                        self.code.append(f'\t{self.OP_REL[type][instr.op]} al')
+                        self.code.append(f'\t{self.MOVE[r_type]} {self.ACC_REG[r_type]}, {arg1}')
+                        self.code.append(f'\t{self.CMP[r_type]} {self.ACC_REG[r_type]}, {arg2}')
+                        self.code.append(f'\t{self.OP_REL[r_type][instr.op]} al')
                         self.code.append('\tmovzx eax, al')
                         self.code.append(f'\tmov {result}, eax')
                     elif instr.op == Operator.DIV:
-                        if type == Type.REAL:
-                            self.code.append(f'\t{self.MOVE[type]} {self.ACC_REG[type]}, {arg1}')
-                            self.code.append(f'\t{self.OP_ARITH[type][instr.op]} {self.ACC_REG[type]}, {arg2}')
-                            self.code.append(f'\t{self.MOVE[type]} {result}, {self.ACC_REG[type]}')
+                        if r_type == Type.REAL:
+                            self.code.append(f'\t{self.MOVE[r_type]} {self.ACC_REG[r_type]}, {arg1}')
+                            self.code.append(f'\t{self.OP_ARITH[r_type][instr.op]} {self.ACC_REG[r_type]}, {arg2}')
+                            self.code.append(f'\t{self.MOVE[r_type]} {result}, {self.ACC_REG[r_type]}')
                         else:
                             self.code.append(f'\tmov eax, {arg1}')
                             self.code.append('\tcdq')
@@ -209,7 +222,7 @@ class X64CodeGenerator():
                             self.code.append('\tidiv ecx')
                             self.code.append(f'\tmov {result}, eax')
                     elif instr.op == Operator.MOD:
-                        if type == Type.REAL:
+                        if r_type == Type.REAL:
                             self.code.append(f'\tmovsd xmm0, {arg1}')
                             self.code.append(f'\tmovsd xmm1, {arg2}')
                             self.code.append('\tmov eax, 2')

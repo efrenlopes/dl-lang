@@ -18,6 +18,7 @@ from dlc.tree.nodes import (
     ConvertNode,
     VarNode,
     BinaryNode,
+    UnaryNode,
     LiteralNode
 )
 from ctypes import c_int32, c_double
@@ -161,6 +162,23 @@ class IC(Visitor):
 
 
 
+    def visit_unary_node(self, node: UnaryNode):
+        arg = node.expr.accept(self)
+        temp = Temp(node.type)
+        
+        match node.token.tag:
+            case Tag.SUM:
+                op = Operator.PLUS
+            case Tag.SUB:
+                op = Operator.MINUS
+            case Tag.NOT:
+                op = Operator.NOT
+        
+        self.add_instr(Instr(op, arg, Operand.EMPTY, temp))
+        return temp
+
+
+
     def visit_if_node(self, node: IfNode):
         arg = node.expr.accept(self)
         lbl_out = Label()
@@ -189,22 +207,6 @@ class IC(Visitor):
         #out
         self.add_instr(Instr(Operator.LABEL, Operand.EMPTY, Operand.EMPTY, lbl_out))
 
-        # expr = self._expr.gen_inter_code()
-        # lbl_true = emitter.new_label()
-        # lbl_false = emitter.new_label()
-        # lbl_out = emitter.new_label()
-        # #Vai para lbl_true caso verdade e para lbl_false caso contrário
-        # emitter.emit_if_goto(expr.as_inter_code(), lbl_true)
-        # emitter.emit_goto(lbl_false)
-        # #Processa o corpo do IF e vai para lbl_out
-        # emitter.emit_label(lbl_true)
-        # self._stmt1.gen_inter_code()
-        # emitter.emit_goto(lbl_out)
-        # #Processa o corpo do ELSE
-        # emitter.emit_label(lbl_false)
-        # self._stmt2.gen_inter_code()
-        # #Label para fora do IF-ELSE
-        # emitter.emit_label(lbl_out)
 
 
     def visit_while_node(self, node: WhileNode):
@@ -260,11 +262,25 @@ class IC(Visitor):
         Operator.LE: lambda a, b: a <= b,
         Operator.GT: lambda a, b: a > b,
         Operator.GE: lambda a, b: a >= b,
+        Operator.PLUS: lambda a: + a,
+        Operator.MINUS: lambda a: - a,
+        Operator.NOT: lambda a: not a,
+        Operator.CONVERT: lambda a: float(a)
     }
 
     @staticmethod
-    def operate(op: str, value1, value2):
+    def operate(op: Operator, value1, value2):
         value = IC.OPS[op](value1, value2)
+        if isinstance(value, bool):
+            return value
+        elif isinstance(value, int):
+            return c_int32(value).value
+        elif isinstance(value, float):
+            return c_double(value).value
+
+    @staticmethod
+    def operate_unary(op: Operator, value):
+        value = IC.OPS[op](value)
         if isinstance(value, bool):
             return value
         elif isinstance(value, int):
@@ -324,8 +340,8 @@ class IC(Visitor):
                         vars[result] = i
                     except ValueError:
                         print('Entrada de dados inválida! Programa encerrado.')
-                case Operator.CONVERT:
-                    vars[result] = float(value1)
+                case Operator.CONVERT | Operator.PLUS | Operator.MINUS | Operator.NOT:
+                    vars[result] = IC.operate_unary(op, value1)
                 case Operator.MOVE:
                     vars[result] = value1
                 case _:

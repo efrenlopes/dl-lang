@@ -23,7 +23,8 @@ PYTHONPATH=src python -m dlc tests/inputs/prog.dl
 <EQUAL>     ::= <EQUAL> EQ_OP <REL> | <REL>
 <REL>       ::= <REL> REL_OP <ARITH> | <ARITH>
 <ARITH>     ::= <ARITH> "+" <TERM> | <ARITH> "-" <TERM> | <TERM>
-<TERM>      ::= <TERM> "*" <FACTOR> | <TERM> "/" <FACTOR> | <TERM> "%" <FACTOR> | <FACTOR>
+<TERM>      ::= <TERM> "*" <UNARY> | <TERM> "/" <UNARY> | <TERM> "%" <UNARY> | <UNARY>
+<UNARY>     ::= "+" <UNARY> | "-" <UNARY> | "!" <UNARY> | <FACTOR>
 <FACTOR>    ::= "(" <EXPR> ")" | ID | LIT_INT | LIT_REAL | LIT_BOOL
 
 LETTER      = "a" | "b" | ... | "z" | "A" | "B" | ... "Z" | "_"

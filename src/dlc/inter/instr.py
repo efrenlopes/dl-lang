@@ -23,7 +23,7 @@ class Instr:
                 return f'{op} {arg1} {Operator.GOTO} {result}'
             case Operator.GOTO: 
                 return f'{op} {result}'
-            case Operator.CONVERT: 
+            case Operator.CONVERT | Operator.PLUS | Operator.MINUS | Operator.NOT:
                 return f'{result} {Operator.MOVE} {op} {arg1}'
             case Operator.PRINT: 
                 return f'{op} {arg1}'

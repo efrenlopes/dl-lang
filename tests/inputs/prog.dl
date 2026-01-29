@@ -17,4 +17,14 @@ programa primo inicio
     fim;
 
     escreva(eh_primo);
+
+    real d;
+    d = i;
+    escreva(d);
+    
+    i = ---5;
+    escreva(i);
+
+    eh_primo = !eh_primo;
+    escreva(eh_primo);
 fim.

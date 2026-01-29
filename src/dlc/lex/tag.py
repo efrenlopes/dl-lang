@@ -11,6 +11,7 @@ class Tag(Enum):
     MOD = '%'
     EQ = '=='
     NE = '!='
+    NOT = '!'
     LT = '<'
     LE = '<='
     GT = '>'

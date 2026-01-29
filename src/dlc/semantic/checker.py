@@ -15,6 +15,7 @@ from dlc.tree.nodes import (
     VarNode,
     LiteralNode,
     BinaryNode,
+    UnaryNode,
     ConvertNode,
     ExprNode
 )
@@ -194,6 +195,23 @@ class Checker(Visitor):
             node.expr1 = Checker.widening(node.expr1, common_type)
             node.expr2 = Checker.widening(node.expr2, common_type)
     
+
+
+    def visit_unary_node(self, node: UnaryNode):
+        node.expr.accept(self)
+        type = node.expr.type
+
+        node.type = Type.UNDEF
+        match node.operator:
+            case Tag.SUM | Tag.SUB:
+                if type.is_numeric:
+                    node.type = node.expr.type
+            case Tag.NOT:
+                if type.is_boolean:
+                    node.type = node.expr.type
+        
+        if node.type.is_undef:
+            self.__error(node.line, f'Operação unária "{node.operator}" com operando inválido.')
 
 
     def visit_convert_node(self, node: ConvertNode):

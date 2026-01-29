@@ -104,6 +104,26 @@ class BinaryNode(ExprNode):
 
 
 
+class UnaryNode(ExprNode):
+    def __init__(self, token: Token, expr: ExprNode):
+        super().__init__(token)
+        self.expr = expr
+
+    @property
+    def operator(self):
+        return self.token.tag
+    
+    def accept(self, visitor: Visitor):
+        return visitor.visit_unary_node(self)
+
+    def __str__(self):
+        if self.type:
+            return f'u{self.operator.value}:{self.type}'
+        return f'u{self.operator.value}'
+
+
+
+
 class ConvertNode(ExprNode):
     def __init__(self, expr: ExprNode):
         super().__init__(None)

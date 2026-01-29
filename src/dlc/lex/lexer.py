@@ -70,16 +70,16 @@ class Lexer:
         match self.peek:
             case Tag.ASSIGN.value:
                 next_char()
-                if self.peek == Tag.ASSIGN.value:
+                if self.peek == Tag.EQ.value[1]:
                     next_char()
                     return Token(self.line, Tag.EQ)
                 return Token(self.line, Tag.ASSIGN)
-            case '!':
+            case Tag.NOT.value:
                 next_char()
                 if self.peek == Tag.NE.value[1]:
                     next_char()
                     return Token(self.line, Tag.NE)
-                return Token(self.line, Tag.UNK, ';')
+                return Token(self.line, Tag.NOT)
 
             case Tag.SUM.value:
                 next_char()
