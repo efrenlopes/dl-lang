@@ -15,6 +15,7 @@ class Operator(Enum):
     MUL = '*'
     DIV = '/'
     MOD = '%'
+    POW = '^'
     EQ = '=='
     NE = '!='
     LT = '<'

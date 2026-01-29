@@ -9,6 +9,7 @@ class Tag(Enum):
     MUL = '*'
     DIV = '/'
     MOD = '%'
+    POW = '^'
     EQ = '=='
     NE = '!='
     NOT = '!'

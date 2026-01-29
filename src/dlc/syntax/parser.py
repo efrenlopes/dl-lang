@@ -232,7 +232,14 @@ class Parser:
             op = self.__move()
             return UnaryNode(op, self.__unary())
         else:
-            return self.__factor()
+            return self.__pow()
+
+    def __pow(self):
+        expr = self.__factor()
+        if self.lookahead.tag == Tag.POW:
+            op = self.__move()
+            return BinaryNode(op, expr, self.__unary())
+        return expr
 
     def __factor(self):
         match = self.__match

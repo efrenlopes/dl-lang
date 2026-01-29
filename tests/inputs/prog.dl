@@ -8,7 +8,7 @@ programa primo inicio
     se (num <= 1)
         eh_primo = falso
     senao
-        eh_primo = verdade;
+        eh_primo = !falso;
 
     enquanto ( i < num & eh_primo == verdade) inicio
         se (num%i == 0)
@@ -16,5 +16,9 @@ programa primo inicio
         i = i + +1;
     fim;
 
-    escreva(!!eh_primo);
+    i = 2;
+    enquanto (i < 1000) inicio
+        i = i^2;
+        escreva(i);
+    fim;
 fim.

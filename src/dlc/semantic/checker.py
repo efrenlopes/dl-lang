@@ -181,7 +181,7 @@ class Checker(Visitor):
             case Tag.EQ | Tag.NE:
                 if common_type:
                     node_type = Type.BOOL
-            case Tag.SUM | Tag.SUB | Tag.MUL | Tag.DIV | Tag.MOD:
+            case Tag.SUM | Tag.SUB | Tag.MUL | Tag.DIV | Tag.MOD | Tag.POW:
                 if t1.is_numeric and t2.is_numeric:
                     node_type = common_type
             case Tag.LT | Tag.LE | Tag.GT | Tag.GE:
