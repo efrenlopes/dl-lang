@@ -1,0 +1,23 @@
+{
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.pyc": true,
+    "**/*.pyc": {"when": "$(basename).py"},
+    "**/*.pyo": true,
+    "**/*.pyd": true
+  },
+  "files.watcherExclude": {
+    "**/__pycache__/**": true,
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/bower_components/**": true
+  },
+  "search.exclude": {
+    "**/__pycache__": true,
+    "**/.pyc": true,
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/*.pyc": true
+  }
+}

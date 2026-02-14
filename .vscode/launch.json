@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "Python Debugger: dlc (module)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "dlc",
+            "env": {
+                "PYTHONPATH": "src"
+            },            
+            "args": [
+                "tests/inputs/prog.dl"
+            ],
+            "console": "integratedTerminal"
+        }
+    ]
+}

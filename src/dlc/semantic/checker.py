@@ -19,7 +19,7 @@ from dlc.tree.nodes import (
     ConvertNode,
     ExprNode
 )
-import colorama
+#import colorama
 
 class Checker(Visitor):
     
@@ -31,16 +31,16 @@ class Checker(Visitor):
 
     def __error(self, line: int, msg: str):
         self.had_errors = True
-        colorama.init()
-        print(colorama.Fore.RED, end='')
+        #colorama.init()
+        #print(colorama.Fore.RED, end='')
         print(f'Erro semântico na linha {line}: {msg}')
-        print(colorama.Style.RESET_ALL, end='')
+        #print(colorama.Style.RESET_ALL, end='')
 
     def __warning(self, line: int, msg: str):
-        colorama.init()
-        print(colorama.Fore.YELLOW, end='')
+        #colorama.init()
+        #print(colorama.Fore.YELLOW, end='')
         print(f'Aviso na linha {line}: {msg}') 
-        print(colorama.Style.RESET_ALL, end='')
+        #print(colorama.Style.RESET_ALL, end='')
         
         
     def visit_program_node(self, node: ProgramNode):
