@@ -3,6 +3,10 @@
 PYTHONPATH=src python -m dlc tests/inputs/prog.dl
 ```
 
+```bash
+pip install .
+python -m dlc tests/inputs/prog.dl
+```
 
 ## Gramática da linguagem DL
 ```bnf

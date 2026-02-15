@@ -43,21 +43,21 @@ class IC(Visitor):
     }
 
     def __init__(self, ast: AST):
-        self.__instr = []
-        self.__label_map = {}
-        self.__label_bb_map = {}
         self.__var_temp_map = {}
+        self.__label_bb_map = {}
         self.__bb_sequence = [BasicBlock()]
         ast.root.accept(self)
 
     def __iter__(self):
-        return iter(self.__instr)
+        for bb in self.__bb_sequence:
+            for instr in bb:
+                yield instr
     
-    def __len__(self):
-        return len(self.__instr)
+    # def __len__(self):
+    #     return len(self.__instr)
     
-    def __getitem__(self, index):
-        return self.__instr[index]
+    # def __getitem__(self, index):
+    #     return self.__instr[index]
 
     
 
@@ -129,14 +129,6 @@ class IC(Visitor):
                 tac.append(str(instr))
         return '\n'.join(tac)
 
-    # def __str__(self):
-    #     tac = []
-    #     for instr in self.__instr:
-    #         tac.append(str(instr))
-    #     return '\n'.join(tac)
-
-
-
 
     def visit_program_node(self, node: ProgramNode):
         L0 = Label()
@@ -173,13 +165,12 @@ class IC(Visitor):
     def visit_literal_node(self, node: LiteralNode):
         return Const(node.type, node.value)
 
+
     def visit_convert_node(self, node: ConvertNode):
         arg = node.expr.accept(self)
         temp = Temp(node.type)
         self.add_instr(Instr(Operator.CONVERT, arg, Operand.EMPTY, temp))        
         return temp
-
-
 
 
     def visit_binary_node(self, node: BinaryNode):
@@ -208,7 +199,6 @@ class IC(Visitor):
             #self.add_instr(Instr(Operator.GOTO, EMPTY, EMPTY, lbl_end))
             #end
             self.add_instr(Instr(Operator.LABEL, EMPTY, EMPTY, lbl_end))
-        
         
         elif node.token.tag == Tag.AND:
             #labels
@@ -321,13 +311,6 @@ class IC(Visitor):
     
         
 
-    def update_label_index(self):
-        for i, instr in enumerate(self.__instr):
-            if instr.op == Operator.LABEL:
-                self.__label_map[instr.result] = i
-    
-    def label_index(self, label: Label):
-        return self.__label_map[label]
 
 
 
@@ -372,7 +355,6 @@ class IC(Visitor):
             return c_double(value).value
 
     def interpret(self):
-        self.update_label_index()
         vars = {}
                 
         def get_value(arg):
@@ -381,54 +363,63 @@ class IC(Visitor):
             if arg.is_const:
                 return arg.value
 
-        index = 0
-        while True:
-            if index >= len(self.__instr):
-                break  
-
-            op = self.__instr[index].op
-            result = self.__instr[index].result
-            value1 = get_value(self.__instr[index].arg1)
-            value2 = get_value(self.__instr[index].arg2)
-            
-            match op:
-                case Operator.LABEL:
-                    pass
-                case Operator.IF:
-                    if value1:                    
-                        index = self.__label_map[result]                    
-                        continue
-                case Operator.IFFALSE:
-                    if not value1:
-                        index = self.__label_map[result]
-                        continue
-                case Operator.GOTO:
-                    index = self.__label_map[result]
-                    continue
-                case Operator.PRINT:
-                    if isinstance(value1, float):
-                        print(f'output: {value1:.4f}')
-                    else:
-                        print(f'output: {int(value1)}')
-                case Operator.READ:
-                    try:
-                        i = input('input: ')
-                        match result.type:
-                            case Type.BOOL:
-                                i = bool(int(i))
-                            case Type.INT:
-                                i = int(i)
-                            case Type.REAL:
-                                i = float(i)
-                        vars[result] = i
-                    except ValueError:
-                        print('Entrada de dados inválida! Interpretação encerrada.')
-                        return
-                case Operator.CONVERT | Operator.PLUS | Operator.MINUS | Operator.NOT:
-                    vars[result] = IC.operate_unary(op, value1)
-                case Operator.MOVE:
-                    vars[result] = value1
-                case _:
-                    vars[result] = IC.operate(op, value1, value2)
+        bb = self.__bb_sequence[0]
+        while bb:
+            next_bb = None
+            for instr in bb:
+                op = instr.op
+                result = instr.result
+                value1 = get_value(instr.arg1)
+                value2 = get_value(instr.arg2)
                 
-            index += 1
+                match op:
+                    case Operator.LABEL:
+                        continue
+                    case Operator.IF:
+                        if value1:                    
+                            next_bb = self.__bb_from_label(result)
+                            break
+                    case Operator.IFFALSE:
+                        if not value1:
+                            next_bb =  self.__bb_from_label(result)
+                            break
+                    case Operator.GOTO:
+                        next_bb = self.__bb_from_label(result)
+                        break
+                    case Operator.PRINT:
+                        if isinstance(value1, float):
+                            print(f'output: {value1:.4f}')
+                        else:
+                            print(f'output: {int(value1)}')
+                    case Operator.READ:
+                        try:
+                            i = input('input: ')
+                            match result.type:
+                                case Type.BOOL:
+                                    i = bool(int(i))
+                                case Type.INT:
+                                    i = int(i)
+                                case Type.REAL:
+                                    i = float(i)
+                            vars[result] = i
+                        except ValueError:
+                            print('Entrada de dados inválida! Interpretação encerrada.')
+                            return
+                    case Operator.CONVERT | Operator.PLUS | Operator.MINUS | Operator.NOT:
+                        vars[result] = IC.operate_unary(op, value1)
+                    case Operator.MOVE:
+                        vars[result] = value1
+                    case _:
+                        vars[result] = IC.operate(op, value1, value2)
+
+
+            #TRANSIÇÃO DE BLOCOS
+            if next_bb:
+                bb = next_bb
+            else:
+                if not bb.successors:
+                    bb = None # Fim do programa
+                elif len(bb.successors) == 1:
+                    bb = bb.successors[0]
+                else:
+                    bb = bb.successors[-1]

@@ -16,7 +16,7 @@ from dlc.tree.nodes import (
     UnaryNode,
     LiteralNode,
 )
-#import colorama
+import colorama
 
 
 class Parser:
@@ -30,10 +30,10 @@ class Parser:
         self.__parse()
 
     def __error(self, line: int, msg: str):
-        #colorama.init()
-        #print(colorama.Fore.RED, end='')
+        colorama.init()
+        print(colorama.Fore.RED, end='')
         print(f'Erro sintático na linha {line}: {msg}')
-        #print(colorama.Style.RESET_ALL, end='')
+        print(colorama.Style.RESET_ALL, end='')
         self.had_errors = True
         raise SyntaxError()
 

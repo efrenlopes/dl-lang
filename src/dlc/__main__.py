@@ -37,22 +37,19 @@ if __name__ == '__main__':
     ic = IC(ast)
     print("\nTAC")
     print(ic, '\n')
-    ic.plot()
-
-
     print('\nInterpretação do Código Intermediário')
     ic.interpret()
 
-    # #Geração de código x64
-    # code = X64CodeGenerator(ic).code
-    # file_name = 'out/prog.s'
-    # Path(file_name).parent.mkdir(parents=True, exist_ok=True)
-    # file = open(file_name, 'w')
-    # file.write('\n'.join(code))
-    # file.close()
-    # print('\n\nSaída do programa alvo gerado')
-    # subprocess.run(['gcc', file_name, '-o', 'out/prog', '-lm'], check=True)
-    # subprocess.run(['./out/prog'], check=True)
+    #Geração de código x64
+    code = X64CodeGenerator(ic).code
+    file_name = 'out/prog.s'
+    Path(file_name).parent.mkdir(parents=True, exist_ok=True)
+    file = open(file_name, 'w')
+    file.write('\n'.join(code))
+    file.close()
+    print('\n\nSaída do programa alvo gerado')
+    subprocess.run(['gcc', file_name, '-o', 'out/prog', '-lm'], check=True)
+    subprocess.run(['./out/prog'], check=True)
 
     #Fim
     print('\nCompilação concluída com sucesso!')
