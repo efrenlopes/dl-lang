@@ -4,6 +4,7 @@ from dlc.semantic.type import Type
 from dlc.inter.operator import Operator
 from dlc.inter.operand import Operand, Temp, Const, Label
 from dlc.inter.instr import Instr
+from dlc.inter.basic_block import BasicBlock
 from dlc.tree.nodes import (
     Visitor,
     ProgramNode,
@@ -44,9 +45,10 @@ class IC(Visitor):
     def __init__(self, ast: AST = None):
         self.__instr = []
         self.__label_map = {}
+        self.__label_bb_map = {}
         self.__var_temp_map = {}
-        if ast:
-            ast.root.accept(self)
+        self.__bb_list = [BasicBlock()]
+        ast.root.accept(self)
 
     def __iter__(self):
         return iter(self.__instr)
@@ -57,19 +59,90 @@ class IC(Visitor):
     def __getitem__(self, index):
         return self.__instr[index]
 
+    
+
+
+    def __bb_from_label(self, label):
+        if label not in self.__label_bb_map:
+            self.__label_bb_map[label] = BasicBlock()
+        return self.__label_bb_map[label]
+
+
     def add_instr(self, instr: Instr):
-        self.__instr.append( instr )
+        bb = self.__bb_list[-1]
+
+        if instr.op == Operator.LABEL:
+            target_bb = self.__bb_from_label(instr.result)
+            
+            # Se o bloco atual tem comandos, conecta ao novo label
+            if bb.instructions:
+                if bb.instructions[-1].op != Operator.GOTO:
+                    bb.add_successor(target_bb)
+                self.__bb_list.append(target_bb)
+            else:
+                # Se o atual está vazio, "fundimos" as referências
+                # Fazemos com que o placeholder que estava na lista 
+                # aponte para o mesmo objeto que o label no mapa.
+                self.__bb_list[-1] = target_bb
+            
+            target_bb.instructions.append(instr)
+
+        elif instr.op == Operator.GOTO:
+            bb.instructions.append(instr)
+            bb.add_successor(self.__bb_from_label(instr.result))
+            self.__bb_list.append(BasicBlock()) # Próximo bloco físico
+
+        elif instr.op in (Operator.IF, Operator.IFFALSE):
+            bb.instructions.append(instr)
+            next_bb = BasicBlock()
+            bb.add_successor(self.__bb_from_label(instr.result))
+            bb.add_successor(next_bb)
+            self.__bb_list.append(next_bb)
+
+        else:
+            bb.instructions.append(instr)
+
+
+
+
+
+
+    def plot(self):
+        from graphviz import Digraph
+        dot = Digraph()
+        dot.attr(fontname="consolas")
+        for bb in self.__bb_list:
+            code = [str(i) for i in bb]
+            code.insert(0, '-----')
+            code.insert(0, str(bb))
+            dot.node(str(bb), '\n'.join(code), shape="box")
+            for s in bb.successors:
+                dot.edge(str(bb), str(s))
+        dot.render('out/teste_fluxo', view=True) 
+
+
+
+
 
     def __str__(self):
         tac = []
-        for instr in self.__instr:
-            tac.append(str(instr))
+        for bb in self.__bb_list:
+            for instr in bb:
+                tac.append(str(instr))
         return '\n'.join(tac)
+
+    # def __str__(self):
+    #     tac = []
+    #     for instr in self.__instr:
+    #         tac.append(str(instr))
+    #     return '\n'.join(tac)
 
 
 
 
     def visit_program_node(self, node: ProgramNode):
+        #L0 = Label()
+        #self.add_instr(Instr(Operator.LABEL, Operand.EMPTY, Operand.EMPTY, L0))
         node.stmt.accept(self)
     
 
@@ -136,6 +209,8 @@ class IC(Visitor):
             #self.add_instr(Instr(Operator.GOTO, EMPTY, EMPTY, lbl_end))
             #end
             self.add_instr(Instr(Operator.LABEL, EMPTY, EMPTY, lbl_end))
+        
+        
         elif node.token.tag == Tag.AND:
             #labels
             lbl_false = Label()
@@ -155,7 +230,8 @@ class IC(Visitor):
                 #self.add_instr(Instr(Operator.GOTO, EMPTY, EMPTY, lbl_end))
             #end
             self.add_instr(Instr(Operator.LABEL, EMPTY, EMPTY, lbl_end))            
-        else:   
+        else:
+              
             self.add_instr(Instr(IC.__OP_MAP[node.operator], arg1, arg2, temp))
         
         return temp
