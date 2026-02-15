@@ -133,7 +133,7 @@ class IC(Visitor):
             #false
             self.add_instr(Instr(Operator.LABEL, EMPTY, EMPTY, lbl_false))
             self.add_instr(Instr(Operator.MOVE, Const(Type.BOOL, False), EMPTY, temp))
-            self.add_instr(Instr(Operator.GOTO, EMPTY, EMPTY, lbl_end))
+            #self.add_instr(Instr(Operator.GOTO, EMPTY, EMPTY, lbl_end))
             #end
             self.add_instr(Instr(Operator.LABEL, EMPTY, EMPTY, lbl_end))
         elif node.token.tag == Tag.AND:
@@ -144,7 +144,7 @@ class IC(Visitor):
             #tests
             self.add_instr(Instr(Operator.IFFALSE, arg1, EMPTY, lbl_false))
             self.add_instr(Instr(Operator.IFFALSE, arg2, EMPTY, lbl_false))
-            self.add_instr(Instr(Operator.GOTO, EMPTY, EMPTY, lbl_true))
+                #self.add_instr(Instr(Operator.GOTO, EMPTY, EMPTY, lbl_true))
             #true
             self.add_instr(Instr(Operator.LABEL, EMPTY, EMPTY, lbl_true))
             self.add_instr(Instr(Operator.MOVE, Const(Type.BOOL, True), EMPTY, temp))
@@ -152,7 +152,7 @@ class IC(Visitor):
             #false
             self.add_instr(Instr(Operator.LABEL, EMPTY, EMPTY, lbl_false))
             self.add_instr(Instr(Operator.MOVE, Const(Type.BOOL, False), EMPTY, temp))
-            self.add_instr(Instr(Operator.GOTO, EMPTY, EMPTY, lbl_end))
+                #self.add_instr(Instr(Operator.GOTO, EMPTY, EMPTY, lbl_end))
             #end
             self.add_instr(Instr(Operator.LABEL, EMPTY, EMPTY, lbl_end))            
         else:   
@@ -187,7 +187,7 @@ class IC(Visitor):
         self.add_instr(Instr(Operator.IFFALSE, arg, Operand.EMPTY, lbl_out))
         #true
         node.stmt.accept(self)
-        self.add_instr(Instr(Operator.GOTO, Operand.EMPTY, Operand.EMPTY, lbl_out))
+            #self.add_instr(Instr(Operator.GOTO, Operand.EMPTY, Operand.EMPTY, lbl_out))
         #out
         self.add_instr(Instr(Operator.LABEL, Operand.EMPTY, Operand.EMPTY, lbl_out))
 
@@ -204,7 +204,7 @@ class IC(Visitor):
         #else-stmt
         self.add_instr(Instr(Operator.LABEL, Operand.EMPTY, Operand.EMPTY, lbl_else))
         node.stmt2.accept(self)
-        self.add_instr(Instr(Operator.GOTO, Operand.EMPTY, Operand.EMPTY, lbl_out))
+            #self.add_instr(Instr(Operator.GOTO, Operand.EMPTY, Operand.EMPTY, lbl_out))
         #out
         self.add_instr(Instr(Operator.LABEL, Operand.EMPTY, Operand.EMPTY, lbl_out))
 
