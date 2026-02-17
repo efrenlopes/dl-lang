@@ -46,11 +46,11 @@ class IC(Visitor):
         self.__var_temp_map = {}
         self.__label_bb_map = {}
         self.__comments = {}
-        self.__bb_sequence = [BasicBlock()]
+        self.bb_sequence = [BasicBlock()]
         ast.root.accept(self)
 
     def __iter__(self):
-        for bb in self.__bb_sequence:
+        for bb in self.bb_sequence:
             for instr in bb:
                 yield instr
     
@@ -71,7 +71,7 @@ class IC(Visitor):
 
 
     def add_instr(self, instr: Instr, comment: str=None):
-        bb = self.__bb_sequence[-1]
+        bb = self.bb_sequence[-1]
         instr_prev = bb.instructions[-1] if bb.instructions else None
 
         # 1. Decidir se precisamos trocar de bloco ANTES de processar a instrução
@@ -79,12 +79,12 @@ class IC(Visitor):
             bb_new = self.__bb_from_label(instr.result)
             # Se o bloco atual está vazio, apenas substitui (resolve o bb0 do init)
             if not bb.instructions:
-                self.__bb_sequence[-1] = bb_new
+                self.bb_sequence[-1] = bb_new
             else:
                 # Só conecta se o bloco anterior não terminou em GOTO
                 if instr_prev and instr_prev.op != Operator.GOTO:
                     bb.add_successor(bb_new)
-                self.__bb_sequence.append(bb_new)
+                self.bb_sequence.append(bb_new)
             bb = bb_new
 
         # Se a anterior foi um salto, a instrução ATUAL (não sendo label) precisa de um novo bloco
@@ -93,7 +93,7 @@ class IC(Visitor):
             # Se era um IF, o bloco novo é o caminho "falso" (fall-through)
             if instr_prev.op != Operator.GOTO:
                 bb.add_successor(bb_new)
-            self.__bb_sequence.append(bb_new)
+            self.bb_sequence.append(bb_new)
             bb = bb_new
 
         # 2. Agora que estamos no bloco correto, processamos a instrução
@@ -112,7 +112,7 @@ class IC(Visitor):
         from graphviz import Digraph
         dot = Digraph()
         dot.attr(fontname="consolas")
-        for bb in self.__bb_sequence:
+        for bb in self.bb_sequence:
             code = [str(i) for i in bb]
             dot.node(name=str(bb), label='\n'.join(code), shape="box", xlabel=str(bb))
             for s in bb.successors:
@@ -125,7 +125,7 @@ class IC(Visitor):
 
     def __str__(self):
         tac = []
-        for bb in self.__bb_sequence:
+        for bb in self.bb_sequence:
             for instr in bb:
                 comment = self.__comments.get(instr)
                 if comment:
@@ -369,7 +369,7 @@ class IC(Visitor):
             if arg.is_const:
                 return arg.value
 
-        bb = self.__bb_sequence[0]
+        bb = self.bb_sequence[0]
         while bb:
             next_bb = None
             for instr in bb:
