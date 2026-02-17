@@ -38,15 +38,16 @@ class LiveRange:
             # antes de um label que é alvo de um GOTO posterior, e é usada dentro desse
             # bloco, o end da vida dela deve ser, no mínimo, a instrução de GOTO que fecha o loop.
             # A estratégia consolidada e recomendada usa Control-Flow.
-            if instr.op in (Operator.GOTO, Operator.IF, Operator.IFFALSE):
-                label_index = ic.label_index(instr.result)
-                if (label_index < i):
-                    for var, lr in int_live_ranges.items():
-                        if lr.start <= label_index and lr.end >= label_index:
-                                lr.end = max(lr.end, i)
-                    for var, lr in double_live_ranges.items():
-                        if lr.start <= label_index and lr.end >= label_index:
-                                lr.end = max(lr.end, i)
+
+            # if instr.op in (Operator.GOTO, Operator.IF, Operator.IFFALSE):
+            #     label_index = ic.label_index(instr.result)
+            #     if (label_index < i):
+            #         for var, lr in int_live_ranges.items():
+            #             if lr.start <= label_index and lr.end >= label_index:
+            #                     lr.end = max(lr.end, i)
+            #         for var, lr in double_live_ranges.items():
+            #             if lr.start <= label_index and lr.end >= label_index:
+            #                     lr.end = max(lr.end, i)
 
 
                 
